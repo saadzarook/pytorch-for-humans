@@ -1,0 +1,4 @@
+Nudging:  slope for w = -32.288,  slope for b = -14.133
+Formula:  slope for w = -32.288,  slope for b = -14.133
+Downhill for w: increase it
+Downhill for b: increase it

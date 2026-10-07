@@ -1,0 +1,29 @@
+{
+  "$comment": "Single source of truth for this lesson's numbers. The sims read it directly; facts.py checks that every snippet's copy matches it (Python cells must stay self-contained, so they can't import it).",
+  "delivery": {
+    "x": [0.5, 0.8, 1.0, 1.3, 1.5, 1.9, 2.2, 2.5, 2.8, 3.0, 3.3, 3.6],
+    "y": [11.7, 11.2, 13.5, 13.0, 16.4, 17.8, 18.4, 21.9, 20.9, 23.2, 25.3, 24.7],
+    "xName": "distance",
+    "yName": "minutes"
+  },
+  "chai": {
+    "x": [0.0, 0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 1.8, 2.0, 2.5],
+    "y": [41.0, 46.0, 47.0, 53.0, 54.0, 60.0, 61.0, 67.0, 70.0, 77.0],
+    "xName": "rain_hours",
+    "yName": "cups"
+  },
+  "contour": {
+    "start": { "w": 0, "b": 0 },
+    "maxSteps": 400,
+    "view": { "w": [-1, 11], "b": [-4, 20], "x": [0, 4], "y": [0, 30] },
+    "xLabel": "distance (km) →",
+    "yLabel": "minutes",
+    "describe": "delivery takes {b} min + {w} min per km",
+    "presets": [
+      { "id": "slow", "label": "🐢 Too slow", "lr": 0.01 },
+      { "id": "good", "label": "👌 Just right", "lr": 0.1 },
+      { "id": "zigzag", "label": "〰️ Zig-zag", "lr": 0.16 },
+      { "id": "chaos", "label": "🔥 Chaos mode", "lr": 0.18 }
+    ]
+  }
+}

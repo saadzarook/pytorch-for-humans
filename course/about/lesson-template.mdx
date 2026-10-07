@@ -1,0 +1,35 @@
+---
+title: How lessons work
+description: The teaching flow and the eight-part template every PyTorch for Humans lesson follows.
+---
+
+Every lesson follows the same flow: **see it → build it from scratch → use the real tool.**
+
+1. **See it**: an interactive sim in the browser, for instant intuition.
+2. **Build it from scratch**: NumPy code that runs on the page (via [Pyodide](https://pyodide.org/), Python compiled to WebAssembly).
+3. **Use the real tool**: PyTorch, in a Kaggle notebook that runs top to bottom on free hardware.
+
+Why the split? PyTorch has no official build that runs inside a web browser, so the in-page Python uses NumPy, and the real PyTorch runs on Kaggle (or your own machine).
+
+## The eight sections
+
+| # | Section | What it does |
+| --- | --- | --- |
+| 1 | 🤔 Why should I care? | A real problem first, no jargon. |
+| 2 | 🌫️ Real-life analogy | Every concept gets one before any notation. |
+| 3 | 🎮 Poke it. Break it. | Interactive sim with presets that show success *and* failure. |
+| 4 | 🛠️ Build it from scratch | Editable NumPy, runnable in the browser. |
+| 5 | 🔥 The PyTorch way | Real code on the page, plus Open in Kaggle and run-locally steps. |
+| 6 | 🔧 "Bro, why is it broken?" | The common mistakes, with real error messages and fixes. |
+| 7 | 🏆 Mini challenge + quiz | A graded coding challenge and 3–5 questions with explanations. |
+| 8 | 😂 Meme recap + TL;DR | The summary, with a couple of jokes that stand on their own. |
+
+## House rules
+
+- **Intuition before notation.** Never a formula without a picture or analogy first.
+- **Short paragraphs, casual tone.** A smart friend over chai, not a textbook.
+- **Memes in moderation** (3–5 per lesson), recreated as our own text/CSS, never copied images, and always explained so the joke works for everyone.
+- **Every code cell runs.** Snippets live in real `.py` files and CI executes them, along with every notebook.
+- **Nothing is pasted.** Outputs on the page are generated from real runs, the notebook includes the same snippet files, and every number the prose quotes is computed and checked by the course's tests.
+
+Contributor docs (how to create a new lesson) live in the repository's `README.md` and `templates/lesson/`.

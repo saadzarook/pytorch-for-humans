@@ -1,0 +1,268 @@
+---
+/**
+ * <PyRunner />: an editable, runnable Python cell (Pyodide + NumPy, in the browser).
+ *
+ * Keep the code in a real .py file next to the lesson and import it with `?raw`,
+ * so CI can run exactly the same code with CPython:
+ *
+ *   import code from './snippets/descent.py?raw';
+ *   <PyRunner code={code} title="Gradient descent from scratch" plot="losses" />
+ *
+ * Props
+ * - code:      starting code (the Reset button restores it)
+ * - title:     shown above the editor
+ * - check:     optional Python run *after* the reader's code, in the same
+ *              namespace, to grade a challenge (print ✅ / ❌ messages)
+ * - plot:      optional variable name; if the code defines it as a list/array
+ *              of numbers, it's drawn as a "loss vs step" chart after running
+ * - plotLabel: caption for that chart
+ */
+interface Props {
+  code: string;
+  title?: string;
+  check?: string;
+  plot?: string;
+  plotLabel?: string;
+}
+
+const { code, title = 'Python playground', check, plot, plotLabel } = Astro.props;
+const trimmed = code.replace(/\s+$/, '') + '\n';
+const rows = Math.min(Math.max(trimmed.split('\n').length, 4), 32);
+const uid = `py-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<py-runner class="pfh-card py-runner" data-check={check} data-plot={plot}>
+  <div class="head">
+    <span class="pfh-card-title">🐍 {title}</span>
+    <span class="badge">Runs in your browser</span>
+  </div>
+
+  <label class="pfh-visually-hidden" for={uid}>Python code, editable</label>
+  <textarea
+    id={uid}
+    class="editor"
+    spellcheck="false"
+    autocapitalize="off"
+    autocomplete="off"
+    autocorrect="off"
+    rows={rows}
+    aria-describedby={`${uid}-hint`}>{trimmed}</textarea>
+  <p class="hint" id={`${uid}-hint`}>
+    Edit freely. <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>Enter</kbd> runs. <kbd>Tab</kbd> indents; press <kbd>Esc</kbd> then <kbd>Tab</kbd> to leave the editor.
+  </p>
+
+  <div class="pfh-row">
+    <button type="button" class="pfh-btn pfh-btn--primary" data-action="run">▶&#xFE0E; Run</button>
+    <button type="button" class="pfh-btn" data-action="stop" hidden>■ Stop</button>
+    <button type="button" class="pfh-btn" data-action="reset">↺ Reset code</button>
+    <span class="state" role="status" aria-live="polite"></span>
+  </div>
+
+  <pre class="out" tabindex="0" aria-label="Output" hidden></pre>
+  {
+    plot && (
+      <figure class="plot" hidden>
+        <canvas aria-hidden="true" />
+        <figcaption>{plotLabel ?? `${plot} after each step`}</figcaption>
+      </figure>
+    )
+  }
+</py-runner>
+
+<style>
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .badge {
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+  }
+  .editor {
+    display: block;
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    font-family: var(--pfh-font-mono);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    tab-size: 4;
+    color: var(--sl-color-white);
+    background: var(--sl-color-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 0.5rem;
+    resize: vertical;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .editor:focus-visible {
+    outline: 2px solid var(--sl-color-accent);
+    outline-offset: 1px;
+  }
+  .hint {
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+    margin: 0.35rem 0 0.6rem;
+  }
+  kbd {
+    font-family: var(--pfh-font-mono);
+    font-size: 0.85em;
+    padding: 0 0.25em;
+    border: 1px solid var(--card-border);
+    border-radius: 0.25em;
+  }
+  .state {
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-2);
+  }
+  .out {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    max-height: 22rem;
+    overflow: auto;
+    font-family: var(--pfh-font-mono);
+    font-size: 0.85rem;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    background: var(--sl-color-black);
+    color: var(--sl-color-white);
+    border-radius: 0.5rem;
+    border: 1px solid var(--card-border);
+  }
+  .out :global(.err) {
+    color: var(--sim-bad);
+  }
+  .out :global(.warn) {
+    color: var(--sl-color-orange-high, var(--sim-bad));
+  }
+  .plot {
+    margin: 0.75rem 0 0;
+  }
+  .plot canvas {
+    display: block;
+  }
+  .plot figcaption {
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+    margin-top: 0.25rem;
+  }
+</style>
+
+<script>
+  import * as py from './pyodide/client';
+  import { LossChart } from './sims/lib/lossChart';
+  import { onThemeChange } from './sims/lib/theme';
+
+  class PyRunner extends HTMLElement {
+    private editor!: HTMLTextAreaElement;
+    private out!: HTMLPreElement;
+    private state!: HTMLElement;
+    private chart: LossChart | null = null;
+    private escapeTab = false;
+    private running = false;
+
+    connectedCallback() {
+      this.editor = this.querySelector('.editor')!;
+      this.out = this.querySelector('.out')!;
+      this.state = this.querySelector('.state')!;
+
+      this.querySelector('[data-action="run"]')!.addEventListener('click', () => this.run());
+      this.querySelector('[data-action="stop"]')!.addEventListener('click', () => py.stop());
+      this.querySelector('[data-action="reset"]')!.addEventListener('click', () => {
+        this.editor.value = this.editor.defaultValue;
+        this.editor.focus();
+      });
+      this.editor.addEventListener('keydown', (e) => this.onKey(e));
+      onThemeChange(() => this.chart?.draw());
+    }
+
+    private onKey(e: KeyboardEvent) {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        this.run();
+        return;
+      }
+      if (e.key === 'Escape') {
+        this.escapeTab = true;
+        return;
+      }
+      if (e.key === 'Tab' && !this.escapeTab && !e.shiftKey) {
+        e.preventDefault();
+        // execCommand keeps the browser's undo stack working; fall back if unavailable.
+        if (!document.execCommand?.('insertText', false, '    ')) {
+          const { selectionStart: s, selectionEnd: end, value } = this.editor;
+          this.editor.value = value.slice(0, s) + '    ' + value.slice(end);
+          this.editor.selectionStart = this.editor.selectionEnd = s + 4;
+        }
+        return;
+      }
+      this.escapeTab = false;
+    }
+
+    private writeOut(text: string, cls?: string) {
+      const span = document.createElement('span');
+      if (cls) span.className = cls;
+      span.textContent = text.endsWith('\n') ? text : text + '\n';
+      this.out.append(span);
+      this.out.scrollTop = this.out.scrollHeight;
+    }
+
+    private setRunning(running: boolean) {
+      this.running = running;
+      (this.querySelector('[data-action="stop"]') as HTMLButtonElement).hidden = !running;
+      (this.querySelector('[data-action="run"]') as HTMLButtonElement).disabled = running;
+    }
+
+    private async run() {
+      if (this.running) return;
+      this.setRunning(true);
+      this.out.hidden = false;
+      this.out.replaceChildren();
+      const plotFig = this.querySelector<HTMLElement>('.plot');
+      if (plotFig) plotFig.hidden = true;
+
+      this.state.textContent = py.isReady()
+        ? 'Running…'
+        : 'Starting Python (one-time download, about 10 MB)…';
+      const t0 = performance.now();
+
+      const result = await py.run(
+        this.editor.value,
+        { check: this.dataset.check || undefined, plotVar: this.dataset.plot || undefined },
+        {
+          onStdout: (t) => this.writeOut(t),
+          onStderr: (t) => this.writeOut(t, /Warning/.test(t) ? 'warn' : 'err'),
+          onStatus: (t) => {
+            if (t) this.state.textContent = t;
+            else this.state.textContent = 'Running…';
+          },
+        },
+      );
+
+      const secs = ((performance.now() - t0) / 1000).toFixed(1);
+      if (result.stopped) {
+        this.writeOut('■ Stopped. (Python was restarted, so the next run takes a moment.)', 'warn');
+        this.state.textContent = 'Stopped.';
+      } else if (!result.ok) {
+        this.writeOut(result.error ?? 'Something went wrong.', 'err');
+        this.state.textContent = 'Error, see the output below. Errors are normal! Read the last line first.';
+      } else {
+        if (this.out.childElementCount === 0) this.writeOut('(no output, add a print() to see something)');
+        this.state.textContent = `Done in ${secs}s.`;
+        if (plotFig && result.plot && result.plot.length > 0) {
+          plotFig.hidden = false;
+          this.chart ??= new LossChart(plotFig.querySelector('canvas')!);
+          this.chart.resize();
+          this.chart.setValues(result.plot);
+        }
+      }
+      this.setRunning(false);
+    }
+  }
+
+  customElements.define('py-runner', PyRunner);
+</script>

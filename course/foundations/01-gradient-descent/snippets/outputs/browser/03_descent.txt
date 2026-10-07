@@ -1,0 +1,11 @@
+step   0   loss  353.565   w  0.000   b  0.000
+step  25   loss    1.992   w  5.811   b  5.964
+step  50   loss    1.126   w  5.262   b  7.299
+step  75   loss    0.961   w  5.022   b  7.882
+step 100   loss    0.930   w  4.917   b  8.137
+step 125   loss    0.924   w  4.871   b  8.248
+step 150   loss    0.922   w  4.851   b  8.297
+step 175   loss    0.922   w  4.842   b  8.318
+
+Learned: delivery takes 8.33 min + 4.84 min per km
+Exact:   delivery takes 8.33 min + 4.84 min per km

@@ -1,0 +1,206 @@
+/*
+ * PyTorch for Humans — course-wide styles.
+ *
+ * Starlight renders dark mode on `:root` and light mode on
+ * `:root[data-theme='light']`, and always stamps `data-theme` on <html>
+ * (resolving "auto" from prefers-color-scheme), so two scopes cover all cases.
+ */
+
+:root {
+  /* Fonts. Starlight's --sl-font / --sl-font-mono are optional overrides (empty
+     by default), so mirror its own fallback to the system font stacks. */
+  --pfh-font: var(--sl-font, var(--sl-font-system));
+  --pfh-font-mono: var(--sl-font-mono, var(--sl-font-system-mono));
+
+  /* Accent: a PyTorch-ish orange. Dark mode uses accent-high for link text. */
+  --sl-color-accent-low: #3f1a10;
+  --sl-color-accent: #e8573a;
+  --sl-color-accent-high: #ffc4b4;
+
+  /* Sim + chart tokens (dark). Read by the canvas sims at draw time. */
+  --sim-surface: #1a1a19;
+  --sim-text: #ffffff;
+  --sim-text-muted: #c3c2b7;
+  --sim-grid: #383835;
+  --sim-axis: #6b6a64;
+  --sim-curve: #3987e5;
+  --sim-point: #3987e5;
+  --sim-mark: #ff7a52;
+  --sim-mark-ring: #1a1a19;
+  --sim-tangent: #c3c2b7;
+  --sim-good: #0ca30c;
+  --sim-bad: #e66767;
+  --sim-heat-low: #182230;
+  --sim-heat-high: #86b6ef;
+
+  --card-bg: #232322;
+  --card-border: #3a3a37;
+  --quiz-good-bg: #12301a;
+  --quiz-bad-bg: #3a1716;
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: #ffe1d8;
+  --sl-color-accent: #c23a1e;
+  --sl-color-accent-high: #5c1608;
+
+  --sim-surface: #fcfcfb;
+  --sim-text: #0b0b0b;
+  --sim-text-muted: #52514e;
+  --sim-grid: #e6e5e0;
+  --sim-axis: #9a9993;
+  --sim-curve: #2a78d6;
+  --sim-point: #2a78d6;
+  --sim-mark: #d9481f;
+  --sim-mark-ring: #fcfcfb;
+  --sim-tangent: #52514e;
+  --sim-good: #0a7d0a;
+  --sim-bad: #c22f2f;
+  --sim-heat-low: #eef5fd;
+  --sim-heat-high: #184f95;
+
+  --card-bg: #f6f5f2;
+  --card-border: #dddcd6;
+  --quiz-good-bg: #e3f5e3;
+  --quiz-bad-bg: #fbe5e4;
+}
+
+/* ---------- Shared "card" look for lesson widgets ---------- */
+
+.pfh-card {
+  /* Most cards are custom elements (<ball-sim>, <py-runner>…), which are
+     display: inline by default. */
+  display: block;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-block: 1.5rem;
+}
+
+/* Starlight adds top margins to every child of .sl-markdown-content; inside
+   our widgets we want to control spacing ourselves. */
+.sl-markdown-content .pfh-card :where(*) {
+  margin-top: 0;
+}
+
+.pfh-card-title {
+  font-weight: 700;
+  font-size: var(--sl-text-lg);
+  color: var(--sl-color-white);
+  margin-bottom: 0.5rem;
+}
+
+/* ---------- Buttons & form controls used by sims / runner / quiz ---------- */
+
+.pfh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.5rem; /* comfortable touch target */
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--card-border);
+  background: var(--sl-color-bg);
+  color: var(--sl-color-white);
+  font: inherit;
+  font-size: var(--sl-text-sm);
+  cursor: pointer;
+  line-height: 1.2;
+}
+/* `display` above would otherwise beat the [hidden] attribute. */
+.pfh-btn[hidden] {
+  display: none;
+}
+.pfh-btn:hover {
+  border-color: var(--sl-color-accent);
+}
+.pfh-btn:focus-visible {
+  outline: 2px solid var(--sl-color-accent);
+  outline-offset: 2px;
+}
+.pfh-btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.pfh-btn--primary {
+  background: var(--sl-color-accent);
+  border-color: var(--sl-color-accent);
+  color: #fff;
+  font-weight: 600;
+}
+:root[data-theme='light'] .pfh-btn--primary {
+  color: #fff;
+}
+.pfh-btn--primary:hover {
+  filter: brightness(1.08);
+}
+.pfh-btn[aria-pressed='true'] {
+  background: var(--sl-color-accent-low);
+  border-color: var(--sl-color-accent);
+}
+
+.pfh-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.pfh-field {
+  display: grid;
+  gap: 0.2rem;
+  font-size: var(--sl-text-sm);
+  min-width: 0;
+}
+.pfh-field output,
+.pfh-mono {
+  font-family: var(--pfh-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.pfh-field input[type='range'] {
+  width: 100%;
+  accent-color: var(--sl-color-accent);
+  min-height: 1.75rem;
+}
+.pfh-field select {
+  font: inherit;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.4rem;
+  border: 1px solid var(--card-border);
+  background: var(--sl-color-bg);
+  color: var(--sl-color-white);
+  min-height: 2.25rem;
+}
+
+.pfh-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Lesson section headings get a little emoji badge from the MDX itself;
+   keep them from wrapping awkwardly on phones. */
+.sl-markdown-content h2 {
+  scroll-margin-top: 5rem;
+}
+
+/* Wide code blocks should scroll inside themselves, never the page. */
+.sl-markdown-content pre {
+  max-width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pfh-card *,
+  .pfh-card *::before,
+  .pfh-card *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

@@ -1,0 +1,78 @@
+# Builds the Astro + Starlight site and deploys it to GitHub Pages.
+#
+# One-time setup in your GitHub repo:
+#   Settings → Pages → Build and deployment → Source: "GitHub Actions".
+# Optional repository variables (Settings → Secrets and variables → Actions → Variables):
+#   KAGGLE_USERNAME  turns on the "Open in Kaggle" buttons
+name: Deploy site
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Work out the Pages URL
+        id: pages
+        uses: actions/configure-pages@v6
+        # Pages isn't enabled on forks / PRs; fall back to a local-style build there.
+        continue-on-error: true
+
+      # The .ipynb download links need the notebooks converted first (no execution here;
+      # the notebooks workflow executes them).
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Convert notebooks for download
+        env:
+          KAGGLE_USERNAME: ${{ vars.KAGGLE_USERNAME }}
+          COURSE_URL: ${{ steps.pages.outputs.base_url }}
+        run: |
+          pip install jupytext==1.19.6 nbformat==5.11.1
+          python scripts/build_notebooks.py --site
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Type-check
+        run: npm run check
+      - name: Build site
+        env:
+          SITE_URL: ${{ steps.pages.outputs.origin }}
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          PUBLIC_KAGGLE_USERNAME: ${{ vars.KAGGLE_USERNAME }}
+          PUBLIC_REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        run: npm run build
+
+      - uses: actions/upload-pages-artifact@v5
+        if: github.event_name != 'pull_request'
+        with:
+          path: site/dist
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v5
+        id: deployment

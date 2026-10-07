@@ -1,0 +1,25 @@
+---
+/**
+ * <Analogy emoji="🌫️" title="Walking downhill in fog">…</Analogy>
+ * A highlighted real-life analogy. Every concept gets one.
+ */
+interface Props {
+  emoji?: string;
+  title: string;
+}
+const { emoji = '💡', title } = Astro.props;
+---
+
+<aside class="pfh-card analogy" aria-label={`Analogy: ${title}`}>
+  <div class="pfh-card-title"><span aria-hidden="true">{emoji}</span> {title}</div>
+  <div class="body"><slot /></div>
+</aside>
+
+<style>
+  .analogy {
+    border-left: 4px solid var(--sl-color-accent);
+  }
+  .body > :global(* + *) {
+    margin-top: 0.75rem;
+  }
+</style>

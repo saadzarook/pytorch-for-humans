@@ -1,0 +1,15 @@
+{
+  "id": "{KAGGLE_USERNAME}/pytorch-for-humans-__NUM__-__SLUG__",
+  "title": "PyTorch for Humans __NUM__: __TITLE__",
+  "code_file": "pytorch-for-humans-__NUM__-__SLUG__.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": "true",
+  "enable_gpu": "false",
+  "enable_tpu": "false",
+  "enable_internet": "false",
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}

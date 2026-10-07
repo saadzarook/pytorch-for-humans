@@ -1,0 +1,32 @@
+{
+  "bestFit": {
+    "b": "8.33",
+    "bShort": "8.3",
+    "w": "4.84",
+    "wShort": "4.8"
+  },
+  "presetOutcomes": {
+    "chaos": "exploded after 49 steps",
+    "good": "converged after 230 steps",
+    "slow": "gave up after 400 steps",
+    "zigzag": "converged after 151 steps"
+  },
+  "presetSteps": {
+    "chaos": "49",
+    "good": "230",
+    "slow": "400",
+    "zigzag": "151"
+  },
+  "presets": {
+    "chaos": "0.18",
+    "good": "0.1",
+    "slow": "0.01",
+    "zigzag": "0.16"
+  },
+  "valley": {
+    "gentle": "0.326",
+    "maxLr": "0.168",
+    "ratio": "36",
+    "steep": "11.88"
+  }
+}

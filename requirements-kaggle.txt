@@ -1,0 +1,2 @@
+# Only needed to push notebooks to Kaggle (scripts/kaggle_push.py).
+kaggle==2.2.4

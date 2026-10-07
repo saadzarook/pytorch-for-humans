@@ -1,0 +1,188 @@
+---
+/**
+ * Meme *formats*, recreated as our own simple CSS/emoji illustrations.
+ * No copyrighted meme images are embedded. Every meme carries a one-line
+ * `explain` so the joke works even if you've never seen the original.
+ *
+ *   <Meme kind="drake" no="lr = 10" yes="lr = 0.1" explain="…" />
+ *   <Meme kind="brain" levels={['…', '…', '…', '…']} explain="…" />
+ *   <Meme kind="fine" caption="loss = NaN" explain="…" />
+ *   <Meme kind="pigeon" label="local minimum" question="Is this the global minimum?" explain="…" />
+ */
+type Props =
+  | { kind: 'drake'; no: string; yes: string; explain: string }
+  | { kind: 'brain'; levels: string[]; explain: string }
+  | { kind: 'fine'; caption: string; explain: string }
+  | { kind: 'pigeon'; label: string; question: string; explain: string };
+
+const props = Astro.props;
+const brainEmoji = ['🧠', '🧠✨', '🧠💡💡', '🌌🧠🌌'];
+---
+
+<figure class="pfh-card meme">
+  {
+    props.kind === 'drake' && (
+      <div class="drake" role="img" aria-label={`Two-panel "nope / yep" meme. Nope: ${props.no}. Yep: ${props.yes}.`}>
+        <div class="row">
+          <span class="face" aria-hidden="true">🙅</span>
+          <span class="txt">{props.no}</span>
+        </div>
+        <div class="row yes">
+          <span class="face" aria-hidden="true">👉😎</span>
+          <span class="txt">{props.yes}</span>
+        </div>
+      </div>
+    )
+  }
+  {
+    props.kind === 'brain' && (
+      <ol class="brain" aria-label="Expanding-brain meme, from least to most enlightened">
+        {props.levels.map((lvl, i) => (
+          <li style={`--lvl:${i}`}>
+            <span class="txt">{lvl}</span>
+            <span class="face" aria-hidden="true">{brainEmoji[Math.min(i, brainEmoji.length - 1)]}</span>
+          </li>
+        ))}
+      </ol>
+    )
+  }
+  {
+    props.kind === 'fine' && (
+      <div class="fine" role="img" aria-label={`"This is fine" meme: a calm dog drinking coffee in a burning room. Caption: ${props.caption}`}>
+        <div class="flames" aria-hidden="true">🔥🔥🔥🔥🔥</div>
+        <div class="scene" aria-hidden="true">🐶☕</div>
+        <div class="bubble">This is fine.</div>
+        <div class="cap">{props.caption}</div>
+      </div>
+    )
+  }
+  {
+    props.kind === 'pigeon' && (
+      <div class="pigeon" role="img" aria-label={`"Is this a pigeon?" meme. Someone points at a butterfly labelled "${props.label}" and asks: ${props.question}`}>
+        <span class="face" aria-hidden="true">🧑‍💻</span>
+        <span class="arrow" aria-hidden="true">👉</span>
+        <span class="bfly"><span aria-hidden="true">🦋</span><small>{props.label}</small></span>
+        <div class="q">{props.question}</div>
+      </div>
+    )
+  }
+  <figcaption>{props.explain}</figcaption>
+</figure>
+
+<style>
+  .meme {
+    max-width: 34rem;
+  }
+  figcaption {
+    margin-top: 0.75rem;
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-2);
+  }
+  .face {
+    font-size: 2rem;
+    line-height: 1;
+  }
+  .txt {
+    font-weight: 700;
+    color: var(--sl-color-white);
+  }
+
+  /* Two-panel "nope / yep" */
+  .drake {
+    display: grid;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+  }
+  .drake .row {
+    display: grid;
+    grid-template-columns: 4.5rem 1fr;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem;
+    background: var(--quiz-bad-bg);
+  }
+  .drake .row.yes {
+    background: var(--quiz-good-bg);
+  }
+  .drake .face {
+    text-align: center;
+  }
+
+  /* Expanding brain */
+  .brain {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.35rem;
+  }
+  .brain li {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.85rem;
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--sl-color-accent) calc(var(--lvl) * 14%), var(--sl-color-bg));
+    border: 1px solid var(--card-border);
+  }
+
+  /* This is fine */
+  .fine {
+    position: relative;
+    text-align: center;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background: linear-gradient(180deg, #ffb347 0%, #ff7043 100%);
+    color: #1a1a19;
+  }
+  .flames {
+    font-size: 1.5rem;
+    letter-spacing: 0.25rem;
+  }
+  .scene {
+    font-size: 3rem;
+  }
+  .bubble {
+    display: inline-block;
+    margin-top: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    background: #fff;
+    color: #1a1a19;
+    font-weight: 700;
+  }
+  .cap {
+    margin-top: 0.5rem;
+    font-family: var(--pfh-font-mono);
+    font-weight: 700;
+  }
+
+  /* Is this a pigeon? */
+  .pigeon {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background: var(--sl-color-bg);
+    border: 1px solid var(--card-border);
+  }
+  .pigeon .bfly {
+    display: grid;
+    justify-items: start;
+    font-size: 2rem;
+  }
+  .pigeon .bfly small {
+    font-size: var(--sl-text-xs);
+    font-family: var(--pfh-font-mono);
+  }
+  .pigeon .q {
+    grid-column: 1 / -1;
+    font-weight: 700;
+    font-size: var(--sl-text-lg);
+    color: var(--sl-color-white);
+  }
+</style>

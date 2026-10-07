@@ -1,0 +1,2 @@
+RuntimeError: a leaf Variable that requires grad is being used in an in-place operation.
+With no_grad it works: w = 2.8

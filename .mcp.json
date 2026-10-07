@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "contour-mcp": {
+      "command": "node",
+      "args": [
+        "c:\\Users\\saadz\\.vscode\\extensions\\saadz.api-contract-tracer-mcp-0.3.0\\out\\mcp-server.js"
+      ],
+      "env": {
+        "CONTOUR_CACHE_PATH": "c:\\Users\\saadz\\Documents\\Data Science\\Self\\pytorch\\.contour-mcp\\cache.json",
+        "CONTOUR_WORKSPACE_ROOTS": "c:\\Users\\saadz\\Documents\\Data Science\\Self\\pytorch",
+        "CONTOUR_COUPLING_ENABLED": "false"
+      }
+    }
+  }
+}

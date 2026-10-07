@@ -1,0 +1,17 @@
+---
+/**
+ * <Output text={someOutput} />: a snippet's printed output, as a code block.
+ *
+ * Always pass a GENERATED file (snippets/outputs/**.txt, written by
+ * scripts/test_snippets.py from a real run), never hand-pasted text.
+ */
+import { Code } from '@astrojs/starlight/components';
+
+interface Props {
+  text: string;
+  title?: string;
+}
+const { text, title = 'Output' } = Astro.props;
+---
+
+<Code code={text.replace(/\n$/, '')} lang="text" title={title} />

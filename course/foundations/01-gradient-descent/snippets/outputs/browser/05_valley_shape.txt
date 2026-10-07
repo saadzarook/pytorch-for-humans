@@ -1,0 +1,4 @@
+Curvature across the valley (steep):  11.88
+Curvature along the valley (gentle):  0.326
+So it's about 36x steeper across than along.
+Biggest learning rate that doesn't explode: 2 / 11.88 = 0.168

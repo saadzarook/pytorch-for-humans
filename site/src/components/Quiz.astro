@@ -1,0 +1,175 @@
+---
+/**
+ * <Quiz />: multiple-choice questions with instant feedback and an
+ * explanation for *every* option (wrong answers teach too).
+ *
+ * Text supports `inline code`, **bold** and *italics*.
+ *
+ *   <Quiz questions={[
+ *     { q: 'What does the learning rate control?', options: [
+ *       { text: 'Step size', correct: true, why: 'Yes! …' },
+ *       { text: 'Which way to step', why: 'Nope, the slope decides direction…' },
+ *     ]},
+ *   ]} />
+ */
+interface Option {
+  text: string;
+  correct?: boolean;
+  why: string;
+}
+interface Question {
+  q: string;
+  options: Option[];
+}
+interface Props {
+  questions: Question[];
+  title?: string;
+}
+
+const { questions, title = 'Quick quiz' } = Astro.props;
+const uid = `quiz-${Math.random().toString(36).slice(2, 8)}`;
+
+const esc = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const md = (s: string) =>
+  esc(s)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>');
+---
+
+<pfh-quiz class="pfh-card quiz" data-total={questions.length}>
+  <div class="pfh-card-title">🧠 {title}</div>
+  <p class="score" role="status" aria-live="polite">
+    Answer each question. You can retry; the explanation appears for whatever you pick.
+  </p>
+  <ol class="questions">
+    {
+      questions.map((question, qi) => (
+        <li class="question">
+          <fieldset>
+            <legend set:html={md(question.q)} />
+            <div class="options">
+              {question.options.map((opt, oi) => (
+                <label class="option">
+                  <input
+                    type="radio"
+                    name={`${uid}-q${qi}`}
+                    value={oi}
+                    data-correct={opt.correct ? 'true' : 'false'}
+                  />
+                  <span set:html={md(opt.text)} />
+                </label>
+              ))}
+            </div>
+            <div class="feedback" aria-live="polite">
+              {question.options.map((opt, oi) => (
+                <p class="why" data-for={oi} hidden>
+                  <strong>{opt.correct ? '✅ Correct! ' : '❌ Not quite. '}</strong>
+                  <span set:html={md(opt.why)} />
+                </p>
+              ))}
+            </div>
+          </fieldset>
+        </li>
+      ))
+    }
+  </ol>
+</pfh-quiz>
+
+<style>
+  .score {
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-2);
+  }
+  .questions {
+    padding-left: 1.25rem;
+    margin: 0.75rem 0 0;
+  }
+  .question + .question {
+    margin-top: 1.25rem;
+  }
+  fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+  }
+  legend {
+    font-weight: 600;
+    color: var(--sl-color-white);
+    margin-bottom: 0.5rem;
+    padding: 0;
+  }
+  .options {
+    display: grid;
+    gap: 0.4rem;
+  }
+  .option {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--card-border);
+    border-radius: 0.5rem;
+    background: var(--sl-color-bg);
+    cursor: pointer;
+  }
+  .option input {
+    margin-top: 0.3rem;
+    accent-color: var(--sl-color-accent);
+    flex: none;
+  }
+  .option:has(input:focus-visible) {
+    outline: 2px solid var(--sl-color-accent);
+    outline-offset: 2px;
+  }
+  .option.is-right {
+    border-color: var(--sim-good);
+    background: var(--quiz-good-bg);
+  }
+  .option.is-wrong {
+    border-color: var(--sim-bad);
+    background: var(--quiz-bad-bg);
+  }
+  .why {
+    margin: 0.5rem 0 0;
+    font-size: var(--sl-text-sm);
+  }
+</style>
+
+<script>
+  class PfhQuiz extends HTMLElement {
+    private firstTry = new Map<number, boolean>();
+
+    connectedCallback() {
+      const total = Number(this.dataset.total);
+      this.querySelectorAll<HTMLFieldSetElement>('fieldset').forEach((fs, qi) => {
+        fs.addEventListener('change', (e) => {
+          const input = e.target as HTMLInputElement;
+          const right = input.dataset.correct === 'true';
+          if (!this.firstTry.has(qi)) this.firstTry.set(qi, right);
+
+          fs.querySelectorAll('.option').forEach((label) => {
+            label.classList.remove('is-right', 'is-wrong');
+          });
+          input.closest('.option')!.classList.add(right ? 'is-right' : 'is-wrong');
+          fs.querySelectorAll<HTMLElement>('.why').forEach((p) => {
+            p.hidden = p.dataset.for !== input.value;
+          });
+
+          const answered = this.firstTry.size;
+          const score = [...this.firstTry.values()].filter(Boolean).length;
+          const status = this.querySelector('.score')!;
+          status.textContent =
+            answered < total
+              ? `${score} / ${answered} right on the first try so far.`
+              : score === total
+                ? `🏆 ${score} / ${total} on the first try. Galaxy brain unlocked.`
+                : `${score} / ${total} on the first try. Retry any question; the explanations are the real prize.`;
+        });
+      });
+    }
+  }
+  customElements.define('pfh-quiz', PfhQuiz);
+</script>

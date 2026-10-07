@@ -1,0 +1,3 @@
+after backward #1: w.grad = 2.0
+after backward #2: w.grad = 4.0
+after backward #3: w.grad = 6.0

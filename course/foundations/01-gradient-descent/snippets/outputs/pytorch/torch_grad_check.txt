@@ -1,0 +1,2 @@
+autograd:  w.grad = -32.288   b.grad = -14.133
+by hand:   grad_w = -32.288   grad_b = -14.133

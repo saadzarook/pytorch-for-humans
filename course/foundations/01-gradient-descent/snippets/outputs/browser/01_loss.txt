@@ -1,0 +1,7 @@
+0.5 km: guessed   6.5 min, really  11.7 min, off by -5.2
+0.8 km: guessed   7.4 min, really  11.2 min, off by -3.8
+1.0 km: guessed   8.0 min, really  13.5 min, off by -5.5
+1.3 km: guessed   8.9 min, really  13.0 min, off by -4.1
+...
+Loss (mean squared error) = 54.12
+Change w and b above and run again. Can you get the loss below 1?
