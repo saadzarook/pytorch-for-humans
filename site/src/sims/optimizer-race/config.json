@@ -1,17 +1,72 @@
 {
   "$comment": "Single source of truth for the optimizer race. Read by math.ts (the sim) and scripts/simref.py (the PyTorch reference that writes golden.json and facts.json).",
-  "valley": { "a": 0.05, "b": 1.2, "c": 0.6 },
-  "start": [-5.2, 2.2],
+  "valley": {
+    "a": 0.05,
+    "b": 1.2,
+    "c": 0.6
+  },
+  "start": [
+    -5.2,
+    2.2
+  ],
   "defaultLr": 0.1,
-  "lrRange": [0.01, 1.0],
+  "lrRange": [
+    0.01,
+    1.0
+  ],
   "sliderSteps": 100,
   "maxSteps": 500,
   "arriveLoss": 0.01,
   "divergeAbs": 40,
   "momentum": 0.9,
-  "betas": [0.9, 0.999],
-  "eps": 1e-8,
-  "view": { "x": [-6, 6], "y": [-3, 3] },
-  "rates": { "slow": 3, "normal": 8, "fast": 30 },
-  "golden": { "lrs": [0.1, 0.3, 0.9], "steps": 50 }
+  "betas": [
+    0.9,
+    0.999
+  ],
+  "eps": 1e-08,
+  "view": {
+    "x": [
+      -6,
+      6
+    ],
+    "y": [
+      -3,
+      3
+    ]
+  },
+  "rates": {
+    "slow": 3,
+    "normal": 8,
+    "fast": 30
+  },
+  "golden": {
+    "lrs": [
+      0.1,
+      0.3,
+      0.9
+    ],
+    "steps": 50
+  },
+  "claims": [
+    {
+      "id": "everyone-arrives",
+      "says": "Phase 3 of 3: Everyone made it (at the default learning rate)",
+      "check": "all(arrival[n] is not None and defaultDiverged[n] is None for n in arrival)"
+    },
+    {
+      "id": "arrival-order",
+      "says": "at lr 0.1: Momentum, then Adam, then SGD",
+      "check": "order == ['Momentum', 'Adam', 'SGD']"
+    },
+    {
+      "id": "sgd-blows-up-at-top",
+      "says": "push the learning rate toward 1: SGD is the first to blow up",
+      "check": "top['SGD']['diverged'] is not None and top['Momentum']['diverged'] is None"
+    },
+    {
+      "id": "only-sgd-diverges-on-slider",
+      "says": "drag the learning rate past 0.83 to see things blow up / SGD is the only one that blows up",
+      "check": "sgdDivergesFromPos is not None and sliderDiverged['Momentum'] == [] and sliderDiverged['Adam'] == []"
+    }
+  ]
 }

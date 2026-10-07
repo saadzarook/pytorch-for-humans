@@ -44,6 +44,31 @@
     "curvature": "2",
     "flipLr": "0.5"
   },
+  "evidence": {
+    "bowlAroundChaos": {
+      "above": "exploded",
+      "at": "gave up",
+      "below": "bottom"
+    },
+    "bowlCoeffCount": 3,
+    "contourKind": {
+      "chaos": "exploded",
+      "good": "converged",
+      "slow": "gave up",
+      "zigzag": "converged"
+    },
+    "contourLr": {
+      "chaos": 0.18,
+      "good": 0.1,
+      "slow": 0.01,
+      "zigzag": 0.16
+    },
+    "dataCopyProblems": [],
+    "maxLrValue": 0.16838413461066387,
+    "raceSnippetMissingLines": [],
+    "raceSnippetStartMatches": true,
+    "steepValue": 11.87760357960315
+  },
   "presetOutcomes": {
     "chaos": "exploded after 49 steps",
     "good": "converged after 230 steps",

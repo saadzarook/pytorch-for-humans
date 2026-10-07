@@ -21,7 +21,7 @@ const o = facts.outSize;
     in three beats: place it, multiply, add up. The strip under the grids shows the real arithmetic.{' '}
     <b>Click any output pixel</b> to see how it was computed.
   </p>
-  <div class="cv-grid">
+  <div class="sim-trio">
     <div>
       <div class="cv-box"><canvas data-part="input" role="img" aria-label="Input image grid with the sliding kernel window"></canvas></div>
       <div class="cv-cap">input {n}×{n} (1 = ink, 0 = blank)</div>
@@ -72,18 +72,12 @@ const o = facts.outSize;
 </SimShell>
 
 <style>
-  .cv-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    gap: 1.25rem;
-    align-items: center;
-  }
   /* Canvases size to their box; capping the box keeps the grid cells square. */
   .cv-box {
     max-width: 280px;
     margin: 0 auto;
   }
-  .cv-grid [data-part='output'] {
+  [data-part='output'] {
     cursor: pointer;
   }
   .cv-cap {
@@ -197,9 +191,6 @@ const o = facts.outSize;
     text-align: center;
   }
   @media (max-width: 50rem) {
-    .cv-grid {
-      grid-template-columns: minmax(0, 1fr);
-    }
     .cv-kcol {
       max-width: none;
     }

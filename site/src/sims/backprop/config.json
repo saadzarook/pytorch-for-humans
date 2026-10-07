@@ -8,5 +8,22 @@
     "b": 0.5
   },
   "autoMs": 3200,
-  "skipRounds": 10
+  "skipRounds": 10,
+  "claims": [
+    {
+      "id": "start-too-low",
+      "says": "Negative means the prediction is too low.",
+      "check": "startError < 0"
+    },
+    {
+      "id": "start-grads-negative",
+      "says": "The gradients are negative, so subtracting them raises w and b",
+      "check": "startGrads['w'] < 0 and startGrads['b'] < 0"
+    },
+    {
+      "id": "loss-keeps-shrinking",
+      "says": "it keeps shrinking as the prediction closes in on 7",
+      "check": "all(later < earlier for earlier, later in zip(lossByRound, lossByRound[1:]))"
+    }
+  ]
 }

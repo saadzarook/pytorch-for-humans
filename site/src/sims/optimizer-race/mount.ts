@@ -8,7 +8,8 @@
  */
 import cfg from './config.json';
 import facts from './facts.json';
-import { createState, f, floorY, grad, isDiverged, OPT_NAMES, sliderLr, stepState, type OptName, type OptState } from './math';
+import { createState, f, floorY, grad, isDiverged, OPT_NAMES, stepState, type OptName, type OptState } from './math';
+import { bindLogSlider } from '../kit/controls';
 import { arrow, chartFrame, fitCanvas, label, onResize, type Surface } from '../kit/canvas';
 import { wireRunControls } from '../kit/dom';
 import { EventLog } from '../kit/eventLog';
@@ -338,11 +339,6 @@ export const mount: MountFn<{ start?: [number, number] }> = (root, options) => {
     draw();
   }
 
-  function setLrFromSlider() {
-    lr = sliderLr(Number(lrInput.value));
-    lrOut.innerHTML =
-      lr.toFixed(3) + (Number(lrInput.value) >= facts.sgdDivergesFromPos ? ' <span class="sim-warn">chaos zone</span>' : '');
-  }
 
   const { loop, cleanup } = wireRunControls(root, {
     rates: cfg.rates,
@@ -360,10 +356,15 @@ export const mount: MountFn<{ start?: [number, number] }> = (root, options) => {
     },
   });
 
-  lrInput.max = String(cfg.sliderSteps);
-  lrInput.value = String(Math.round(((Math.log10(cfg.defaultLr) - Math.log10(cfg.lrRange[0])) / (Math.log10(cfg.lrRange[1]) - Math.log10(cfg.lrRange[0]))) * cfg.sliderSteps));
-  setLrFromSlider();
-  lrInput.addEventListener('input', setLrFromSlider);
+  // "chaos zone" from the slider position where real torch.optim SGD first diverges (facts.json).
+  bindLogSlider(lrInput, lrOut, {
+    min: cfg.lrRange[0],
+    max: cfg.lrRange[1],
+    steps: cfg.sliderSteps,
+    value: cfg.defaultLr,
+    display: (v, pos) => v.toFixed(3) + (pos >= facts.sgdDivergesFromPos ? ' <span class="sim-warn">chaos zone</span>' : ''),
+    onInput: (v) => (lr = v),
+  });
   cv.addEventListener('click', (e) => {
     const r = cv.getBoundingClientRect();
     sx = X0 + ((e.clientX - r.left) / r.width) * (X1 - X0);

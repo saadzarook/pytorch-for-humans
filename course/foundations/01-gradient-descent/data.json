@@ -214,5 +214,67 @@
     "slopeTol": 0.005,
     "explodeAbs": 1000000.0,
     "globalTol": 0.05
-  }
+  },
+  "claims": [
+    {
+      "id": "data-copies-match",
+      "says": "(every hard-coded copy of the data in the snippets and notebook matches data.json)",
+      "check": "evidence['dataCopyProblems'] == []"
+    },
+    {
+      "id": "contour-slow-runs-out",
+      "says": "Too slow: still getting there when the sim stops",
+      "check": "evidence['contourKind']['slow'] == 'gave up'"
+    },
+    {
+      "id": "contour-good-converges",
+      "says": "Just right: watch the line swing into place",
+      "check": "evidence['contourKind']['good'] == 'converged'"
+    },
+    {
+      "id": "zigzag-survives",
+      "says": "That's why zig-zag survives and chaos doesn't",
+      "check": "evidence['contourLr']['zigzag'] < evidence['maxLrValue'] and evidence['contourKind']['zigzag'] == 'converged'"
+    },
+    {
+      "id": "zigzag-visibly-bounces",
+      "says": "The dot bounces across the valley while creeping along it",
+      "check": "1 - evidence['contourLr']['zigzag'] * evidence['steepValue'] < -0.5"
+    },
+    {
+      "id": "chaos-explodes",
+      "says": "Chaos mode: only a tiny bit bigger than zig-zag, and it explodes",
+      "check": "evidence['contourLr']['chaos'] > evidence['maxLrValue'] and evidence['contourKind']['chaos'] == 'exploded'"
+    },
+    {
+      "id": "zigzag-beats-just-right",
+      "says": "it still finishes sooner than 'just right'",
+      "check": "int(presetSteps['zigzag']) < int(presetSteps['good'])"
+    },
+    {
+      "id": "bowl-presets",
+      "says": "Too slow, Just right and Bouncy settle at the bottom; Chaos mode explodes",
+      "check": "[ball['bowl'][p]['kind'] for p in ['slow', 'good', 'bouncy', 'chaos']] == ['bottom', 'bottom', 'bottom', 'exploded']"
+    },
+    {
+      "id": "bumpy-presets",
+      "says": "Stuck in a dip ends in a local minimum; Lucky leap and Good start find the deep valley",
+      "check": "[ball['bumpy'][p]['kind'] for p in ['stuck', 'leap', 'goodstart']] == ['local', 'bottom', 'bottom']"
+    },
+    {
+      "id": "bowl-is-quadratic",
+      "says": "the distance to the bottom gets multiplied by (1 − 2 × lr) every step",
+      "check": "evidence['bowlCoeffCount'] == 3"
+    },
+    {
+      "id": "bowl-chaos-threshold",
+      "says": "lr = 1: you bounce between the same two points forever; above it every bounce is bigger",
+      "check": "evidence['bowlAroundChaos'] == {'below': 'bottom', 'at': 'gave up', 'above': 'exploded'}"
+    },
+    {
+      "id": "race-snippet-matches-sim",
+      "says": "Same numbers as the sim on this page, because they're the same maths",
+      "check": "evidence['raceSnippetStartMatches'] and evidence['raceSnippetMissingLines'] == []"
+    }
+  ]
 }

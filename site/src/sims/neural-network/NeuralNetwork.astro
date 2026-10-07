@@ -14,31 +14,29 @@ interface Props {
 const { title = 'Watch a network learn' } = Astro.props;
 ---
 
-<SimShell sim="neural-network" title={title} keys={{ toggle: 'play / pause', next: '1 epoch' }}>
+<SimShell sim="neural-network" title={title} layout="two-column" keys={{ toggle: 'play / pause', next: '1 epoch' }}>
   <p slot="intro" class="sim-intro">
     A real network with 2 hidden layers trains here, using backprop and Adam written in plain
     JS. <b>Shading</b> is the network's guess for every spot on the map, and a stronger colour means
     more confident. The <b>solid line</b> is its decision boundary. <b>Red rings</b> mark points it
     currently gets wrong.
   </p>
-  <div class="sim-two">
-    <div>
-      <canvas
-        data-part="map"
-        tabindex="0"
-        role="img"
-        aria-label="Two classes of points (amber and teal) with the network's decision regions and boundary line. Misclassified points are ringed in red."
-      ></canvas>
-    </div>
-    <div class="sim-stack">
-      <div class="sim-readout" data-part="readout"></div>
-      <div>
-        <div class="sim-eyebrow">loss per epoch</div>
-        <div><canvas data-part="loss" aria-label="Training loss over epochs"></canvas></div>
-      </div>
-      <LogPanel />
-    </div>
+  <div slot="stage">
+    <canvas
+      data-part="map"
+      tabindex="0"
+      role="img"
+      aria-label="Two classes of points (amber and teal) with the network's decision regions and boundary line. Misclassified points are ringed in red."
+    ></canvas>
   </div>
+  <Fragment slot="side">
+    <div class="sim-readout" data-part="readout"></div>
+    <div>
+      <div class="sim-eyebrow">loss per epoch</div>
+      <div><canvas data-part="loss" aria-label="Training loss over epochs"></canvas></div>
+    </div>
+    <LogPanel />
+  </Fragment>
   <RunControls stepLabel="1 epoch">
     <label class="pfh-field">
       <span>Data</span>

@@ -1,26 +1,34 @@
 ---
 /**
- * <SimShell sim="optimizer-race" title="…" options={…} keys={…}>…markup…</SimShell>
+ * <SimShell sim="optimizer-race" title="…" layout="two-column" options={…} keys={…}>
  *
  * The frame every course sim lives in (see docs/SIM_STANDARD.md):
  * - a lazily-mounted <pfh-sim> island: the sim's code loads only when it
  *   scrolls near the viewport (the framework-free version of client:visible)
  * - the narrator caption, an aria-live region
+ * - the layout, so sims never hand-write grid CSS
  * - a keyboard hint, listing only the shortcuts this sim supports
  *
- * Put the sim's own markup (canvases, readouts, controls) in the default slot,
- * marking elements with data-part="…" so mount() can find them.
+ * Layouts (all collapse to one column on phones):
+ * - "stack"        default slot only, top to bottom
+ * - "two-column"   slot="stage" (wide, left) | slot="side" (right), then the default slot
+ * - "stage-chart"  the default slot, then slot="chart" | slot="side" side by side
+ *
+ * Mark elements with data-part="…" so mount() can find them. Inside the stage,
+ * kit classes .sim-panels (equal panels) and .sim-trio (panel | narrow | panel)
+ * cover multi-canvas stages.
  */
 interface Props {
   /** Registry name in kit/island.ts. */
   sim: string;
   title: string;
+  layout?: 'stack' | 'two-column' | 'stage-chart';
   /** JSON-serialisable options passed to mount(). */
   options?: unknown;
   /** Which keyboard shortcuts this sim supports. */
   keys?: { toggle?: string; next?: string; back?: string };
 }
-const { sim, title, options = {}, keys = { toggle: 'play / pause', next: 'step' } } = Astro.props;
+const { sim, title, layout = 'stack', options = {}, keys = { toggle: 'play / pause', next: 'step' } } = Astro.props;
 ---
 
 <pfh-sim
@@ -38,7 +46,31 @@ const { sim, title, options = {}, keys = { toggle: 'play / pause', next: 'step' 
     <b class="t">{title}</b>
     <p data-part="loading">Getting the simulation ready…</p>
   </div>
+  {
+    layout === 'two-column' && (
+      <div class="sim-layout">
+        <div class="sim-stack">
+          <slot name="stage" />
+        </div>
+        <div class="sim-stack">
+          <slot name="side" />
+        </div>
+      </div>
+    )
+  }
   <slot />
+  {
+    layout === 'stage-chart' && (
+      <div class="sim-layout">
+        <div class="sim-stack">
+          <slot name="chart" />
+        </div>
+        <div class="sim-stack">
+          <slot name="side" />
+        </div>
+      </div>
+    )
+  }
   <p class="sim-keys">
     Keys (click the sim first):
     {keys.toggle && <><kbd>Space</kbd> {keys.toggle}</>}

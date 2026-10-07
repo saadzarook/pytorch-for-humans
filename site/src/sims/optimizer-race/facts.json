@@ -4,6 +4,11 @@
     "Momentum": 46,
     "SGD": 280
   },
+  "defaultDiverged": {
+    "Adam": null,
+    "Momentum": null,
+    "SGD": null
+  },
   "defaultLr": "0.1",
   "order": [
     "Momentum",
@@ -14,6 +19,17 @@
   "sgdDivergesFromLr": 0.831764,
   "sgdDivergesFromPos": 96,
   "sgdDivergesFromText": "0.83",
+  "sliderDiverged": {
+    "Adam": [],
+    "Momentum": [],
+    "SGD": [
+      96,
+      97,
+      98,
+      99,
+      100
+    ]
+  },
   "top": {
     "Adam": {
       "arrived": 41,

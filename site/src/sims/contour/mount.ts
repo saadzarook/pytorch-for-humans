@@ -10,7 +10,8 @@ import { lineFit, stepFit, type Dataset, type OutcomeKind } from './math';
 import { arrow, dot, fitCanvas, label, onResize, scale, type Surface } from '../kit/canvas';
 import { wireRunControls } from '../kit/dom';
 import { EventLog } from '../kit/eventLog';
-import { fmt, logSlider, niceLr } from '../kit/format';
+import { bindLogSlider, bindPresets } from '../kit/controls';
+import { fmt, niceLr } from '../kit/format';
 import { LossChart } from '../kit/lossChart';
 import { Narrator } from '../kit/narrator';
 import { hexToRgb, onThemeChange, readColors, type SimColors } from '../kit/theme';
@@ -26,7 +27,6 @@ export interface ContourConfig {
   presets: { id: string; label: string; lr: number }[];
 }
 
-const LR = logSlider(0.001, 0.25);
 
 /** About `count` round-numbered ticks between lo and hi. */
 function ticks(lo: number, hi: number, count = 5): number[] {
@@ -406,11 +406,6 @@ export const mount: MountFn<{ data: Dataset; config: ContourConfig }> = (root, {
     },
   });
 
-  const setLr = (v: number, moveSlider = true) => {
-    lr = v;
-    if (moveSlider) lrInput.value = String(LR.toPos(v));
-    part(root, 'lr-out').textContent = String(v);
-  };
   const setStart = (w: number, b: number) => {
     w0 = w;
     b0 = b;
@@ -422,23 +417,25 @@ export const mount: MountFn<{ data: Dataset; config: ContourConfig }> = (root, {
     reset();
     loop.redraw();
   };
-  const clearPressed = () => presetsEl.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', 'false'));
-
-  presetsEl.addEventListener('click', (e) => {
-    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-preset]');
-    if (!btn) return;
-    const p = cfg.presets[Number(btn.dataset.preset)];
-    setLr(p.lr);
-    presetHint = `<b>${p.label}</b> (learning rate ${p.lr}). Press <b>Step</b> or <b>Play</b>.`;
-    presetsEl.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
-    loop.pause();
-    reset();
-    loop.redraw();
+  const lrSlider = bindLogSlider(lrInput, part(root, 'lr-out'), {
+    min: 0.001,
+    max: 0.25,
+    steps: 1000,
+    value: lr,
+    snap: niceLr,
+    onInput: (v) => {
+      lr = v;
+      presetHint = '';
+      presets.clearPressed();
+      loop.pause();
+      reset();
+      loop.redraw();
+    },
   });
-  lrInput.addEventListener('input', () => {
-    setLr(niceLr(LR.toValue(Number(lrInput.value))), false);
-    presetHint = '';
-    clearPressed();
+  const presets = bindPresets(presetsEl, cfg.presets, (p) => {
+    lr = p.lr;
+    lrSlider.set(p.lr);
+    presetHint = `<b>${p.label}</b> (learning rate ${p.lr}). Press <b>Step</b> or <b>Play</b>.`;
     loop.pause();
     reset();
     loop.redraw();
@@ -455,7 +452,6 @@ export const mount: MountFn<{ data: Dataset; config: ContourConfig }> = (root, {
   });
 
   resize();
-  setLr(lr);
   setStart(cfg.start.w, cfg.start.b);
   const stopResize = onResize(part(root, 'panels'), () => {
     resize();

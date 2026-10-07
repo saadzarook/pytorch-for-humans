@@ -14,32 +14,30 @@ interface Props {
 const { title = 'The optimizer race' } = Astro.props;
 ---
 
-<SimShell sim="optimizer-race" title={title}>
+<SimShell sim="optimizer-race" title={title} layout="two-column">
   <p slot="intro" class="sim-intro">
     Three optimizers start at the same spot on a loss landscape shaped like a curved valley. Watch
     the narrator for the three phases and the log for key moments. Click the map to choose a new
     start, and drag the learning rate past {facts.sgdDivergesFromText} to see things blow up.
   </p>
-  <div class="sim-two">
-    <div class="sim-stack">
-      <div>
-        <canvas
-          data-part="map"
-          tabindex="0"
-          role="img"
-          aria-label="Contour map of a curved valley loss landscape with three optimizer paths. Lighter is lower loss. Click to choose a start point."
-        ></canvas>
-      </div>
-      <div class="sim-readout" data-part="readout"></div>
+  <Fragment slot="stage">
+    <div>
+      <canvas
+        data-part="map"
+        tabindex="0"
+        role="img"
+        aria-label="Contour map of a curved valley loss landscape with three optimizer paths. Lighter is lower loss. Click to choose a start point."
+      ></canvas>
     </div>
-    <div class="sim-stack">
-      <div>
-        <div class="sim-eyebrow">loss per step (log scale)</div>
-        <div><canvas data-part="loss" aria-label="Loss over steps for the three optimizers, log scale"></canvas></div>
-      </div>
-      <LogPanel />
+    <div class="sim-readout" data-part="readout"></div>
+  </Fragment>
+  <Fragment slot="side">
+    <div>
+      <div class="sim-eyebrow">loss per step (log scale)</div>
+      <div><canvas data-part="loss" aria-label="Loss over steps for the three optimizers, log scale"></canvas></div>
     </div>
-  </div>
+    <LogPanel />
+  </Fragment>
   <RunControls>
     <label class="pfh-field">
       <span>Learning rate: <span data-part="lr-out" class="pfh-mono"></span></span>

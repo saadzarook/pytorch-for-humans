@@ -16,7 +16,10 @@ Sims (site/src/sims/<sim>/, see docs/SIM_STANDARD.md):
 
     golden.py / golden.json Reference values from real PyTorch; Vitest checks the
                             sim's TypeScript maths matches them.
-    facts.py / facts.json   The numbers and claims the sim's narration relies on.
+    facts.py / facts.json   The numbers the sim's narration relies on (plus evidence).
+    config.json "claims"    Declared narration claims, each a `check` expression over
+                            facts.json, evaluated here (scripts/claims.py). Lessons
+                            declare theirs in data.json. facts.py never decides pass/fail.
 
 Every *.json above is GENERATED from its script and committed; this runner fails
 if any is stale. Sims run first, because lesson facts may cross-check them.
@@ -40,10 +43,13 @@ from __future__ import annotations
 import argparse
 import ast
 import difflib
+import json
 import os
 import subprocess
 import sys
 from pathlib import Path
+
+from claims import check_claims
 
 ROOT = Path(__file__).resolve().parent.parent
 COURSE = ROOT / "course"
@@ -172,8 +178,18 @@ def main() -> int:
         label = script.relative_to(ROOT).as_posix()
         if rc != 0:
             runner.result(False, label, f"{out}{err}")
-        else:
-            runner.golden(out, script.with_suffix(".json"), label)
+            return
+        runner.golden(out, script.with_suffix(".json"), label)
+        if script.name == "facts.py":
+            # The narration's claims are declared next to the facts: a sim's config.json,
+            # or a lesson's data.json. facts.py computes; the claims decide.
+            decl = script.parent / ("config.json" if script.parent.parent == SIMS else "data.json")
+            claims = json.loads(decl.read_text(encoding="utf-8")).get("claims", []) if decl.exists() else []
+            if not claims:
+                runner.result(False, f"{label} claims", f"{decl.relative_to(ROOT).as_posix()} declares no claims")
+                return
+            problems = check_claims(json.loads(out), claims)
+            runner.result(not problems, f"{label} claims ({len(claims)} declared in {decl.name})", "\n".join(problems))
 
     # Sims first: lesson facts may cross-check a sim's facts.json.
     if args.no_torch:

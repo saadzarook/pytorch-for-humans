@@ -20,7 +20,7 @@ interface Props {
 const { curves, curve = 'bowl', title = 'Roll the ball downhill', switchable = true, chaosLr } = Astro.props;
 ---
 
-<SimShell sim="ball" title={title} options={{ curves, curve, chaosLr }}>
+<SimShell sim="ball" title={title} layout="stage-chart" options={{ curves, curve, chaosLr }}>
   <div class="pfh-row" role="group" aria-label="Presets" data-part="presets"></div>
   <div class="ball-stage" data-part="stage">
     <canvas
@@ -56,13 +56,11 @@ const { curves, curve = 'bowl', title = 'Roll the ball downhill', switchable = t
       )
     }
   </RunControls>
-  <div class="sim-two">
-    <figure class="ball-chart">
-      <canvas data-part="chart" aria-hidden="true"></canvas>
-      <figcaption>Loss after each step (hover or tap for exact values)</figcaption>
-    </figure>
-    <LogPanel />
-  </div>
+  <figure slot="chart">
+    <canvas data-part="chart" aria-hidden="true"></canvas>
+    <figcaption>Loss after each step (hover or tap for exact values)</figcaption>
+  </figure>
+  <LogPanel slot="side" />
 </SimShell>
 
 <style>
@@ -72,13 +70,5 @@ const { curves, curve = 'bowl', title = 'Roll the ball downhill', switchable = t
   }
   .ball-eq {
     color: var(--sl-color-gray-2);
-  }
-  .ball-chart {
-    margin: 0;
-  }
-  .ball-chart figcaption {
-    font-size: var(--sl-text-xs);
-    color: var(--sl-color-gray-3);
-    margin-top: 0.25rem;
   }
 </style>

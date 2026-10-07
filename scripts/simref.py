@@ -4,8 +4,9 @@ The sims re-implement maths in TypeScript. Each sim folder (site/src/sims/<sim>/
 has a golden.py and/or facts.py that call into this module and print JSON:
 
     golden.json  exact reference values; Vitest checks the TS maths matches them
-    facts.json   numbers and claims the sim's narration relies on (also checked
-                 by Vitest against the live sim logic)
+    facts.json   numbers (and evidence) the sim's narration relies on; the claims
+                 themselves are declared in the sim's config.json and checked by
+                 scripts/claims.py. Vitest checks the live sim logic reproduces them.
 
 Both are run and kept fresh by scripts/test_snippets.py, like lesson facts.
 Every sim reads the same config.json as its TypeScript code, so the two can't
@@ -31,11 +32,6 @@ def config(sim: str) -> dict:
 
 def dump(obj: object) -> None:
     print(json.dumps(obj, indent=2, ensure_ascii=False, sort_keys=True))
-
-
-def require(condition: bool, message: str) -> None:
-    if not condition:
-        raise SystemExit(f"Sim claim failed: {message}")
 
 
 # --------------------------------------------------------------- optimizer race

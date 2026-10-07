@@ -9,7 +9,8 @@ import { classify, makeCurve, nextW, type Curve, type CurveSpec } from './math';
 import { arrowHead, dot, fitCanvas, label, onResize, scale, type Surface } from '../kit/canvas';
 import { wireRunControls } from '../kit/dom';
 import { EventLog } from '../kit/eventLog';
-import { fmt, logSlider, niceLr } from '../kit/format';
+import { bindLogSlider, bindPresets } from '../kit/controls';
+import { fmt, niceLr } from '../kit/format';
 import { LossChart } from '../kit/lossChart';
 import { Narrator } from '../kit/narrator';
 import { onThemeChange, readColors, type SimColors } from '../kit/theme';
@@ -21,8 +22,6 @@ export interface BallOptions {
   /** From the lesson's facts.json: the bowl's chaos threshold, for the narration. */
   chaosLr?: string;
 }
-
-const LR = logSlider(0.001, 1.5);
 
 export const mount: MountFn<BallOptions> = (root, options) => {
   const narr = new Narrator(part(root, 'narrator'));
@@ -280,24 +279,6 @@ export const mount: MountFn<BallOptions> = (root, options) => {
   }
 
   // ---------- controls ----------
-  function renderPresets() {
-    presetsEl.replaceChildren(
-      ...curve.presets.map((p, i) => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'pfh-btn';
-        b.dataset.preset = String(i);
-        b.setAttribute('aria-pressed', 'false');
-        b.textContent = p.label;
-        return b;
-      }),
-    );
-  }
-  const clearPressed = () => presetsEl.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', 'false'));
-  function syncOutputs() {
-    part(root, 'lr-out').textContent = String(lr);
-    part(root, 'start-out').textContent = fmt(start, 1);
-  }
   function apply(c: Curve, newLr: number, newStart: number) {
     curve = c;
     lr = newLr;
@@ -305,8 +286,8 @@ export const mount: MountFn<BallOptions> = (root, options) => {
     startInput.min = String(c.domain[0] + 0.1);
     startInput.max = String(c.domain[1] - 0.1);
     startInput.value = String(newStart);
-    lrInput.value = String(LR.toPos(newLr));
-    syncOutputs();
+    lrSlider.set(newLr);
+    part(root, 'start-out').textContent = fmt(start, 1);
     reset();
   }
 
@@ -327,31 +308,33 @@ export const mount: MountFn<BallOptions> = (root, options) => {
     },
   });
 
-  presetsEl.addEventListener('click', (e) => {
-    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-preset]');
-    if (!btn) return;
-    const p = curve.presets[Number(btn.dataset.preset)];
+  const presets = bindPresets(presetsEl, curve.presets, (p) => {
     loop.pause();
     presetHint = `<b>${p.label}</b>: ${p.hint} Press <b>Step</b> or <b>Play</b>.`;
     apply(curve, p.lr, p.start);
-    presetsEl.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
     loop.redraw();
   });
-  lrInput.addEventListener('input', () => {
-    loop.pause();
-    lr = niceLr(LR.toValue(Number(lrInput.value)));
-    presetHint = '';
-    clearPressed();
-    syncOutputs();
-    reset();
-    loop.redraw();
+  const lrSlider = bindLogSlider(lrInput, part(root, 'lr-out'), {
+    min: 0.001,
+    max: 1.5,
+    steps: 1000,
+    value: lr,
+    snap: niceLr,
+    onInput: (v) => {
+      loop.pause();
+      lr = v;
+      presetHint = '';
+      presets.clearPressed();
+      reset();
+      loop.redraw();
+    },
   });
   startInput.addEventListener('input', () => {
     loop.pause();
     start = Number(startInput.value);
     presetHint = '';
-    clearPressed();
-    syncOutputs();
+    presets.clearPressed();
+    part(root, 'start-out').textContent = fmt(start, 1);
     reset();
     loop.redraw();
   });
@@ -360,11 +343,10 @@ export const mount: MountFn<BallOptions> = (root, options) => {
     const c = curves[curveSelect.value];
     presetHint = '';
     apply(c, c.defaultLr, c.defaultStart);
-    renderPresets();
+    presets.setPresets(c.presets);
     loop.redraw();
   });
 
-  renderPresets();
   apply(curve, curve.defaultLr, curve.defaultStart);
   const stopResize = onResize(part(root, 'stage'), () => {
     surf = fitCanvas(canvas, 1.7, 360);

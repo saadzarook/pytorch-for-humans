@@ -9,7 +9,7 @@ import { evaluate, genData, initNet, predict, trainEpoch, type Activation, type 
 import { chartFrame, fitCanvas, onResize, type Surface } from '../kit/canvas';
 import { wireRunControls } from '../kit/dom';
 import { EventLog } from '../kit/eventLog';
-import { logSlider } from '../kit/format';
+import { bindLogSlider } from '../kit/controls';
 import { Narrator } from '../kit/narrator';
 import { hexToRgb, onThemeChange, readColors, type SimColors } from '../kit/theme';
 import { part, type MountFn } from '../kit/types';
@@ -25,7 +25,6 @@ export const mount: MountFn = (root) => {
   const actSel = part<HTMLSelectElement>(root, 'activation');
   const lrInput = part<HTMLInputElement>(root, 'lr');
   const lrOut = part(root, 'lr-out');
-  const LR = logSlider(cfg.lrRange[0], cfg.lrRange[1], cfg.sliderSteps);
 
   const DOM = cfg.domain;
   const G = cfg.grid;
@@ -41,7 +40,7 @@ export const mount: MountFn = (root) => {
   let epoch = 0;
   let hist: number[] = [];
   let milestones = new Set<number>();
-  let lr = LR.toValue(cfg.defaultSliderPos);
+  let lr = 0; // set by the slider binding below
   let Hn = cfg.defaultHidden;
   let act: Activation = 'tanh';
   let ds: DatasetName = 'circle';
@@ -248,14 +247,14 @@ export const mount: MountFn = (root) => {
     act = actSel.value as Activation;
     rebuild();
   });
-  const setLr = () => {
-    lr = LR.toValue(Number(lrInput.value));
-    lrOut.textContent = lr.toFixed(4);
-  };
-  lrInput.max = String(cfg.sliderSteps);
-  lrInput.value = String(cfg.defaultSliderPos);
-  lrInput.addEventListener('input', setLr);
-  setLr();
+  lr = bindLogSlider(lrInput, lrOut, {
+    min: cfg.lrRange[0],
+    max: cfg.lrRange[1],
+    steps: cfg.sliderSteps,
+    position: cfg.defaultSliderPos,
+    display: (v) => v.toFixed(4),
+    onInput: (v) => (lr = v),
+  }).value;
 
   build();
   const stopResize = onResize(cv.parentElement!, resize);

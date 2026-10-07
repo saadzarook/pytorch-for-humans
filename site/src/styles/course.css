@@ -385,8 +385,8 @@ pfh-sim:focus-visible {
   outline: 2px solid var(--sl-color-accent);
   outline-offset: 2px;
 }
-/* Two columns on wide screens, one on phones. */
-.sim-two {
+/* SimShell layouts: two columns on wide screens, one on phones. */
+.sim-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
   gap: 1.25rem;
@@ -395,8 +395,31 @@ pfh-sim:focus-visible {
 .sim-stack > * + * {
   margin-top: 0.85rem;
 }
+/* Stage helpers: equal panels side by side (e.g. data plot | loss map) … */
+.sim-panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+}
+/* … or panel | narrow middle | panel (e.g. input | kernel | output). */
+.sim-trio {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: center;
+}
+.sim figure {
+  margin: 0;
+  min-width: 0;
+}
+.sim figcaption {
+  font-size: var(--sl-text-xs);
+  color: var(--sl-color-gray-3);
+  margin-top: 0.25rem;
+}
 @media (max-width: 50rem) {
-  .sim-two {
+  .sim-layout,
+  .sim-trio {
     grid-template-columns: minmax(0, 1fr);
   }
 }

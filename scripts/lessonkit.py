@@ -1,7 +1,8 @@
 """Helpers for a lesson's facts.py (imported by them; not run directly).
 
-A lesson's facts.py derives every number the lesson prose quotes, checks the
-claims the lesson makes, and prints the results as JSON. scripts/test_snippets.py
+A lesson's facts.py derives every number the lesson prose quotes (plus the
+evidence its claims need) and prints the results as JSON. The claims themselves
+are declared in the lesson's data.json and checked by scripts/claims.py. scripts/test_snippets.py
 runs it and compares the JSON with the committed facts.json, which the lesson
 MDX and the notebook build both read. So a quoted number can't silently drift
 away from the code that produces it.
@@ -50,9 +51,3 @@ def check_copies(dataset: dict, files: list[Path]) -> list[str]:
             if name in arrays and arrays[name] != [float(v) for v in dataset[key]]:
                 problems.append(f"{path.name}: `{name}` differs from data.json")
     return problems
-
-
-def require(condition: bool, message: str) -> None:
-    """A lesson claim that must hold. Failing it fails CI with a readable message."""
-    if not condition:
-        raise SystemExit(f"Lesson claim failed: {message}")
