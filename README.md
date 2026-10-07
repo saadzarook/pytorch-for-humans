@@ -105,6 +105,9 @@ notebook that still contains a `{{…}}` placeholder or `# include:` line. Noteb
 
 ## Deploy the website
 
+The full step-by-step launch checklist (GitHub Pages, what passing CI runs look like, the first
+Kaggle push and what to check on the notebook page) is in [docs/LAUNCH.md](docs/LAUNCH.md).
+
 1. Push this repo to GitHub.
 2. **Settings → Pages → Source: GitHub Actions.**
 3. Optional: **Settings → Secrets and variables → Actions → Variables**, add `KAGGLE_USERNAME`
