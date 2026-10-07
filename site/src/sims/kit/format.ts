@@ -7,17 +7,23 @@ export function fmt(v: number, digits = 3): string {
   return v.toFixed(digits).replace('-', '−');
 }
 
+/** Two decimals, the prototype's `f2` (keeps a plain hyphen-minus to match its narration). */
+export function f2(v: number): string {
+  return (Math.round(v * 100) / 100).toFixed(2);
+}
+
 /**
- * Map a 0..1000 slider position onto a log scale between `min` and `max`.
- * Learning rates span orders of magnitude (0.001 → 1), so a log slider gives
- * every regime a fair share of the track.
+ * Map a slider position (0..steps) onto a log scale between `min` and `max`.
+ * Learning rates span orders of magnitude, so a log slider gives every
+ * regime a fair share of the track.
  */
-export function logSlider(min: number, max: number) {
+export function logSlider(min: number, max: number, steps = 1000) {
   const lo = Math.log10(min);
   const hi = Math.log10(max);
   return {
-    toValue: (pos: number) => 10 ** (lo + ((hi - lo) * pos) / 1000),
-    toPos: (value: number) => Math.round(((Math.log10(value) - lo) / (hi - lo)) * 1000),
+    steps,
+    toValue: (pos: number) => 10 ** (lo + ((hi - lo) * pos) / steps),
+    toPos: (value: number) => Math.round(((Math.log10(value) - lo) / (hi - lo)) * steps),
   };
 }
 
@@ -34,4 +40,9 @@ export function fmtAxis(v: number): string {
   if (a >= 100) return v.toFixed(0);
   if (a >= 10) return v.toFixed(1);
   return v.toFixed(2);
+}
+
+/** "1 point" / "3 points". */
+export function plural(n: number, word: string): string {
+  return `${n} ${word}${n === 1 ? '' : 's'}`;
 }

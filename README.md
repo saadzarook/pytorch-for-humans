@@ -27,16 +27,21 @@ course/                         ← all lesson content (CC BY-SA 4.0)
     snippets/browser/*.py       NumPy code shown in <PyRunner> cells (runs in browser + CI)
     snippets/pytorch/*.py       PyTorch code shown on the page (runs in CI)
     snippets/outputs/**.txt     GENERATED stdout of every snippet; the page's "Output" blocks
+  gallery/                      Sim gallery pages (one per sim)
 site/                           Astro + Starlight app (MIT)
-  src/components/sims/          BallSim, ContourSim + shared sim library (lib/)
+  src/sims/kit/                 shared sim kit: narrator, event log, stepper, run loop, keys…
+  src/sims/<sim>/               each sim: config.json, math.ts, mount.ts, <Sim>.astro,
+                                golden.py/.json + facts.py/.json (vs real PyTorch), <sim>.test.ts
   src/components/PyRunner.astro Pyodide code cell (worker in src/components/pyodide/)
   src/components/Quiz.astro     quiz with per-answer explanations
   src/components/lesson/        Analogy, Meme, TLDR, NotebookLinks
 templates/lesson/               starting point for new lessons
+docs/SIM_STANDARD.md            the rules every course sim follows (+ pre-merge checklist)
 scripts/
   new_lesson.py                 scaffold a lesson from the template
-  test_snippets.py              run snippets + facts.py; fail if generated files are stale
-  lessonkit.py                  helpers for facts.py
+  test_snippets.py              run snippets, facts.py and sim golden.py; fail if generated files are stale
+  lessonkit.py                  helpers for lesson facts.py
+  simref.py                     real-PyTorch reference implementations of the sims
   build_notebooks.py            jupytext → .ipynb (+ --execute, --site)
   kaggle_push.py                push built notebooks with the Kaggle CLI
 .github/workflows/
@@ -53,6 +58,8 @@ npm ci              # install (from the repo root: it's an npm workspace)
 npm run dev         # http://localhost:4321 with live reload
 npm run build       # production build into site/dist/
 npm run preview     # serve the production build
+npm run check       # type-check
+npm test            # Vitest: sim maths vs PyTorch golden values, live sims vs facts
 ```
 
 The `.ipynb` download button appears once the notebooks are built into the site (see below, `--site`).
@@ -100,6 +107,13 @@ notebook that still contains a `{{…}}` placeholder or `# include:` line. Noteb
 
 `deploy-site.yml` works out the Pages URL and base path automatically. Pull requests get a build
 check without deploying.
+
+## Sims
+
+Every interactive sim follows [docs/SIM_STANDARD.md](docs/SIM_STANDARD.md): narrated phases,
+nothing autoplays, numbers and labels on show, a log of key moments, keyboard + reduced-motion
+support, and maths checked against real PyTorch. All sims also live in the **Sim gallery** section
+of the site.
 
 ## Add a lesson
 

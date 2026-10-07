@@ -1,0 +1,6 @@
+lr 0.1   SGD       reached the minimum in 280 steps
+lr 0.1   Momentum  reached the minimum in 46 steps
+lr 0.1   Adam      reached the minimum in 119 steps
+lr 1.0   SGD       blew up at step 9
+lr 1.0   Momentum  reached the minimum in 31 steps
+lr 1.0   Adam      reached the minimum in 41 steps

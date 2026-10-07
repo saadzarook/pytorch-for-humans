@@ -15,12 +15,13 @@ export class LossChart {
   private hoverIndex: number | null = null;
   private readonly canvas: HTMLCanvasElement;
   private readonly aspect: number;
+  private readonly stopResize: () => void;
 
   constructor(canvas: HTMLCanvasElement, aspect = 3.2) {
     this.canvas = canvas;
     this.aspect = aspect;
     this.resize();
-    onResize(canvas.parentElement ?? canvas, () => {
+    this.stopResize = onResize(canvas.parentElement ?? canvas, () => {
       this.resize();
       this.draw();
     });
@@ -30,6 +31,10 @@ export class LossChart {
       this.hoverIndex = null;
       this.draw();
     });
+  }
+
+  destroy(): void {
+    this.stopResize();
   }
 
   setValues(values: number[]): void {

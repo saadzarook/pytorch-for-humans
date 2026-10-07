@@ -1,0 +1,17 @@
+---
+title: Backprop as a chain of blame
+description: Walk through one training round of a one-neuron model, forward then backward then update, with the real arithmetic at every step.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Backprop from '~/sims/backprop/Backprop.astro';
+
+`loss.backward()` looks like magic: one line, and every weight suddenly has a `.grad`. This sim slows it right down. Each node in the graph answers one question, *"if my value wiggled up a tiny bit, how much would the loss change?"*, and passes the answer back to its inputs.
+
+<Backprop />
+
+<Aside type="note" title="Which lesson is this from?">
+The upcoming **Autograd** lesson (Foundations). It builds directly on [Gradient descent](../../foundations/gradient-descent/), where `loss.backward()` first appears.
+</Aside>
+
+**How we know it's right:** the loss, `w.grad`, `b.grad` and the updated knobs match real PyTorch autograd for several starting values, and for every round of the "Skip 10 rounds" path.

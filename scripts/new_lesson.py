@@ -19,6 +19,16 @@ ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE = ROOT / "templates" / "lesson"
 TIERS = {"foundations": "Foundations", "intermediate": "Intermediate", "advanced": "Advanced"}
 KAGGLE_TITLE_MAX = 50  # Kaggle rejects longer notebook titles
+SIM_CHECKLIST = [
+    "Narrator explains every phase (what is happening, and why it matters)",
+    "Nothing autoplays; Step works; staged sims have Back/Next; continuous sims start on Slow",
+    "The numbers behind the picture are visible",
+    "Key things are labelled on the canvas",
+    "Key moments are logged with step/epoch numbers",
+    "Only the active element is highlighted",
+    "Keyboard (Space / → / ←), reduced motion, 375px wide, light + dark mode",
+    "Maths checked against PyTorch (golden.py + Vitest); narration numbers come from facts.json",
+]
 
 
 def slugify(text: str) -> str:
@@ -69,7 +79,11 @@ def main() -> int:
     print(f"Created {dest.relative_to(ROOT).as_posix()}/")
     print(f"  page:     /{args.tier}/{slug}/")
     print("  next:     fill in the TODOs, then run")
-    print("            python scripts/test_snippets.py && python scripts/build_notebooks.py --execute")
+    print("            python scripts/test_snippets.py && python scripts/build_notebooks.py --execute && npm test")
+    print()
+    print("  Sim checklist before merging (full version: docs/SIM_STANDARD.md):")
+    for item in SIM_CHECKLIST:
+        print(f"    [ ] {item}")
     return 0
 
 

@@ -1,9 +1,48 @@
 {
+  "ball": {
+    "bowl": {
+      "bouncy": {
+        "kind": "bottom",
+        "steps": 44
+      },
+      "chaos": {
+        "kind": "exploded",
+        "steps": 131
+      },
+      "good": {
+        "kind": "bottom",
+        "steps": 11
+      },
+      "slow": {
+        "kind": "bottom",
+        "steps": 181
+      }
+    },
+    "bumpy": {
+      "goodstart": {
+        "kind": "bottom",
+        "steps": 53
+      },
+      "leap": {
+        "kind": "bottom",
+        "steps": 15
+      },
+      "stuck": {
+        "kind": "local",
+        "steps": 44
+      }
+    }
+  },
   "bestFit": {
     "b": "8.33",
     "bShort": "8.3",
     "w": "4.84",
     "wShort": "4.8"
+  },
+  "bowl": {
+    "chaosLr": "1",
+    "curvature": "2",
+    "flipLr": "0.5"
   },
   "presetOutcomes": {
     "chaos": "exploded after 49 steps",

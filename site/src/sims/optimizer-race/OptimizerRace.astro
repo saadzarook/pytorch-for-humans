@@ -1,0 +1,48 @@
+---
+/**
+ * <OptimizerRace />: SGD vs Momentum vs Adam on a curved valley.
+ * Ported from reference/ml-sim-lab.html; maths checked against torch.optim.
+ */
+import SimShell from '../kit/SimShell.astro';
+import RunControls from '../kit/RunControls.astro';
+import LogPanel from '../kit/LogPanel.astro';
+import facts from './facts.json';
+
+interface Props {
+  title?: string;
+}
+const { title = 'The optimizer race' } = Astro.props;
+---
+
+<SimShell sim="optimizer-race" title={title}>
+  <p slot="intro" class="sim-intro">
+    Three optimizers start at the same spot on a loss landscape shaped like a curved valley. Watch
+    the narrator for the three phases and the log for key moments. Click the map to choose a new
+    start, and drag the learning rate past {facts.sgdDivergesFromText} to see things blow up.
+  </p>
+  <div class="sim-two">
+    <div class="sim-stack">
+      <div>
+        <canvas
+          data-part="map"
+          tabindex="0"
+          aria-label="Contour map of a curved valley loss landscape with three optimizer paths. Lighter is lower loss. Click to choose a start point."
+        ></canvas>
+      </div>
+      <div class="sim-readout" data-part="readout"></div>
+    </div>
+    <div class="sim-stack">
+      <div>
+        <div class="sim-eyebrow">loss per step (log scale)</div>
+        <div><canvas data-part="loss" aria-label="Loss over steps for the three optimizers, log scale"></canvas></div>
+      </div>
+      <LogPanel />
+    </div>
+  </div>
+  <RunControls>
+    <label class="pfh-field">
+      <span>Learning rate: <output data-part="lr-out" class="pfh-mono"></output></span>
+      <input data-part="lr" type="range" min="0" max="100" step="1" />
+    </label>
+  </RunControls>
+</SimShell>

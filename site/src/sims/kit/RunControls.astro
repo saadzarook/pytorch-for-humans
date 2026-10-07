@@ -1,0 +1,23 @@
+---
+/**
+ * Play / Step / Reset + Slow·Normal·Fast, for continuous sims (kit/runLoop.ts).
+ * Extra controls (sliders, selects) go in the default slot.
+ */
+interface Props {
+  stepLabel?: string;
+  resetLabel?: string;
+}
+const { stepLabel = 'Step', resetLabel = '↺ Reset' } = Astro.props;
+---
+
+<div class="pfh-row sim-controls">
+  <button type="button" class="pfh-btn pfh-btn--primary" data-run="play">▶&#xFE0E; Play</button>
+  <button type="button" class="pfh-btn" data-run="step">{stepLabel}</button>
+  <button type="button" class="pfh-btn" data-run="reset">{resetLabel}</button>
+  <div class="sim-seg" role="group" aria-label="Speed" data-part="speed">
+    <button type="button" data-speed="slow" aria-pressed="true">Slow</button>
+    <button type="button" data-speed="normal" aria-pressed="false">Normal</button>
+    <button type="button" data-speed="fast" aria-pressed="false">Fast</button>
+  </div>
+  <slot />
+</div>

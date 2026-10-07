@@ -1,0 +1,11 @@
+---
+/** Back / Next / Auto-play + "step X of N", for staged sims (kit/stepper.ts). Extras go in the slot. */
+---
+
+<div class="pfh-row sim-controls" data-part="stepper">
+  <button type="button" class="pfh-btn" data-step="back">◀&#xFE0E; Back</button>
+  <button type="button" class="pfh-btn pfh-btn--primary" data-step="next">Next ▶&#xFE0E;</button>
+  <button type="button" class="pfh-btn" data-step="auto">Auto-play</button>
+  <span class="sim-readout" data-part="progress"></span>
+  <slot />
+</div>

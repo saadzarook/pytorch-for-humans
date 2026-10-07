@@ -29,9 +29,27 @@ jobs:
           pip install torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
           pip install -r requirements.txt
 
-      # Also fails if a generated output or facts.json is stale, or a lesson claim breaks.
-      - name: Run every lesson snippet and facts.py
+      # Also fails if a generated output, facts.json or golden.json is stale, or a claim breaks.
+      - name: Run snippets, lesson facts and sim golden/facts scripts
+        id: snippets
         run: python scripts/test_snippets.py
+
+      # If the check failed because the generated files differ on Linux (e.g. a last-digit float
+      # difference from Windows), regenerate them here and attach them to the run. The fix is then
+      # "download the artifact, review, commit".
+      - name: Regenerate outputs on failure
+        if: failure() && steps.snippets.outcome == 'failure'
+        run: python scripts/test_snippets.py --update || true
+      - name: Upload regenerated outputs
+        if: failure() && steps.snippets.outcome == 'failure'
+        uses: actions/upload-artifact@v7
+        with:
+          name: regenerated-outputs
+          path: |
+            course/**/snippets/outputs/**
+            course/**/facts.json
+            site/src/sims/*/facts.json
+            site/src/sims/*/golden.json
 
       # Also fails if any included cell prints something different from the website.
       - name: Convert and execute every notebook

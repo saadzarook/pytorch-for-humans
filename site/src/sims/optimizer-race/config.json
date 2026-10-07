@@ -1,0 +1,17 @@
+{
+  "$comment": "Single source of truth for the optimizer race. Read by math.ts (the sim) and scripts/simref.py (the PyTorch reference that writes golden.json and facts.json).",
+  "valley": { "a": 0.05, "b": 1.2, "c": 0.6 },
+  "start": [-5.2, 2.2],
+  "defaultLr": 0.1,
+  "lrRange": [0.01, 1.0],
+  "sliderSteps": 100,
+  "maxSteps": 500,
+  "arriveLoss": 0.01,
+  "divergeAbs": 40,
+  "momentum": 0.9,
+  "betas": [0.9, 0.999],
+  "eps": 1e-8,
+  "view": { "x": [-6, 6], "y": [-3, 3] },
+  "rates": { "slow": 3, "normal": 8, "fast": 30 },
+  "golden": { "lrs": [0.1, 0.3, 0.9], "steps": 50 }
+}

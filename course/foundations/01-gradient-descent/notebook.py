@@ -428,6 +428,125 @@ except ImportError:
 # include: snippets/pytorch/torch_nn_linear.py
 
 # %% [markdown]
+# ### 🚀 Level up: the optimizer race, with real `torch.optim`
+#
+# Plain gradient descent only looks at the slope *right now*. Two famous upgrades remember a
+# little history:
+#
+# - **Momentum** is a heavy ball: it keeps some of its previous speed, so it powers along gentle
+#   slopes (and sometimes rolls past the bottom).
+# - **Adam** rescales every step by how big the slopes have recently been, so its steps stay
+#   sensible on both steep walls and flat floors.
+#
+# Here they race on a curved valley: steep walls, a gently sloping floor that follows
+# `y = 0.6·sin(x)`, and the lowest point at (0, 0). Same start, same learning rate. In PyTorch,
+# swapping optimizer is one line:
+
+# %%
+# include: snippets/pytorch/optimizer_race.py
+
+# %% [markdown]
+# Press ▶ under the animation (or drag the slider). Each dot's position *is* its two weights;
+# lighter background means lower loss, and ✕ is the lowest point. Then read the three phases
+# below: each has a snapshot of that moment.
+
+# %%
+VIEW_X, VIEW_Y = (-6, 6), (-3, 3)
+RACE_COLORS = {"SGD": "#2a78d6", "Momentum": "#eb6834", "Adam": "#1baf7a"}  # same palette as the site
+
+
+def valley_np(x, y):  # the same loss as loss_fn, on NumPy grids
+    return 0.05 * x**2 + 1.2 * (y - 0.6 * np.sin(x)) ** 2
+
+
+def on_floor(p):
+    return abs(p[1] - 0.6 * np.sin(p[0])) < 0.08
+
+
+race_paths = {name: np.array(path) for name, path in paths.items()}  # `paths` comes from the race above
+longest = max(len(p) for p in race_paths.values()) - 1
+# Phase boundaries, measured from the real runs:
+floor_step = max(next(i for i, p in enumerate(path) if on_floor(p)) for path in race_paths.values())
+arrive_step = longest
+print(f"Phase 1 (falling into the valley): steps 0-{floor_step}")
+print(f"Phase 2 (crawling along the floor): steps {floor_step}-{arrive_step}")
+print(f"Phase 3: the last one arrives at step {arrive_step}")
+
+gx, gy = np.meshgrid(np.linspace(*VIEW_X, 160), np.linspace(*VIEW_Y, 80))
+background = go.Contour(x=gx[0], y=gy[:, 0], z=np.log1p(valley_np(gx, gy)), colorscale="Greys",
+                        reversescale=True, showscale=False, contours=dict(coloring="heatmap"), hoverinfo="skip")
+floor_x = np.linspace(*VIEW_X, 200)
+
+
+def race_traces(step):
+    traces = []
+    for name, path in race_paths.items():
+        upto = path[: min(step, len(path) - 1) + 1]
+        traces.append(go.Scatter(x=upto[:, 0], y=upto[:, 1], mode="lines", line=dict(color=RACE_COLORS[name], width=3), name=name))
+        traces.append(go.Scatter(x=upto[-1:, 0], y=upto[-1:, 1], mode="markers+text", text=[name], textposition="top right",
+                                 marker=dict(color=RACE_COLORS[name], size=12, line=dict(color="white", width=2)), showlegend=False))
+    return traces
+
+
+def race_figure(step, animate=False):
+    fig = go.Figure(
+        data=[background,
+              go.Scatter(x=floor_x, y=0.6 * np.sin(floor_x), mode="lines", line=dict(color="gray", dash="dash"), name="valley floor"),
+              go.Scatter(x=[0], y=[0], mode="markers+text", marker=dict(symbol="x", size=14, color="black"), text=["lowest loss"],
+                         textposition="top right", name="lowest point"),
+              *race_traces(step)],
+    )
+    fig.update_layout(title=f"step {step}", height=430, xaxis=dict(range=VIEW_X, title="weight 1 (x)"),
+                      yaxis=dict(range=VIEW_Y, title="weight 2 (y)"), margin=dict(l=40, r=20, t=50, b=40))
+    if animate:
+        steps_ = list(range(0, 30)) + list(range(30, longest + 1, 4)) + [longest]
+        fig.frames = [go.Frame(data=race_traces(s), traces=list(range(3, 9)), name=str(s),
+                               layout=go.Layout(title_text=f"step {s}")) for s in steps_]
+        fig.update_layout(
+            updatemenus=[dict(type="buttons", x=0, y=-0.15, xanchor="left", buttons=[
+                dict(label="▶ Play", method="animate", args=[None, dict(frame=dict(duration=80, redraw=True), fromcurrent=True)]),
+                dict(label="⏸ Pause", method="animate", args=[[None], dict(mode="immediate", frame=dict(duration=0, redraw=False))]),
+            ])],
+            sliders=[dict(active=0, currentvalue=dict(prefix="step "), pad=dict(t=50),
+                          steps=[dict(method="animate", label=str(s), args=[[str(s)], dict(mode="immediate", frame=dict(duration=0, redraw=True))]) for s in steps_])],
+        )
+    return fig
+
+
+race_figure(0, animate=True).show()
+
+# %% [markdown]
+# **Phase 1: falling into the valley.** The valley walls are steep, so the gradients are big and so
+# are the steps. Everyone heads mostly *sideways*, toward the valley floor (dashed line), not
+# toward the ✕. Gradient descent only ever sees the local slope, never the destination.
+
+# %%
+race_figure(floor_step).show()
+
+# %% [markdown]
+# **Phase 2: crawling along the valley floor.** Down here the slope is gentle. **SGD**'s steps are
+# proportional to the gradient, so it slows to a crawl. **Momentum** keeps the speed it built up,
+# so it moves faster but can overshoot. **Adam** divides each step by the recent gradient size, so
+# its steps stay about the same size even on gentle slopes.
+
+# %%
+race_figure(min(60, arrive_step)).show()
+
+# %% [markdown]
+# **Phase 3: everyone made it.** At lr {{sim:optimizer-race.defaultLr}} the finishing order is
+# **{{sim:optimizer-race.orderText}}** ({{sim:optimizer-race.arrival.Momentum}},
+# {{sim:optimizer-race.arrival.Adam}} and {{sim:optimizer-race.arrival.SGD}} steps), exactly what
+# the race printed above.
+#
+# Now the plot twist from the output above: at lr {{sim:optimizer-race.topLr}}, **SGD blows up** (at
+# step {{sim:optimizer-race.top.SGD.diverged}}) while Momentum still arrives in
+# {{sim:optimizer-race.top.Momentum.arrived}} steps. SGD's step is directly proportional to the
+# steep wall's gradient, so it's the first to overshoot itself to death.
+
+# %%
+race_figure(arrive_step).show()
+
+# %% [markdown]
 # ## 6. 🔧 "Bro, why is it broken?"
 #
 # ### 💥 Loss goes to `inf`, then `nan`

@@ -53,6 +53,9 @@ jobs:
       - run: npm ci
       - name: Type-check
         run: npm run check
+      # Sim maths vs real-PyTorch golden values, and live sims vs their facts.
+      - name: Unit tests (Vitest)
+        run: npm test
       - name: Build site
         env:
           SITE_URL: ${{ steps.pages.outputs.origin }}

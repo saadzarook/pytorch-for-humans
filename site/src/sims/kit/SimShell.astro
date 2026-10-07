@@ -1,0 +1,51 @@
+---
+/**
+ * <SimShell sim="optimizer-race" title="…" options={…} keys={…}>…markup…</SimShell>
+ *
+ * The frame every course sim lives in (see docs/SIM_STANDARD.md):
+ * - a lazily-mounted <pfh-sim> island: the sim's code loads only when it
+ *   scrolls near the viewport (the framework-free version of client:visible)
+ * - the narrator caption, an aria-live region
+ * - a keyboard hint, listing only the shortcuts this sim supports
+ *
+ * Put the sim's own markup (canvases, readouts, controls) in the default slot,
+ * marking elements with data-part="…" so mount() can find them.
+ */
+interface Props {
+  /** Registry name in kit/island.ts. */
+  sim: string;
+  title: string;
+  /** JSON-serialisable options passed to mount(). */
+  options?: unknown;
+  /** Which keyboard shortcuts this sim supports. */
+  keys?: { toggle?: string; next?: string; back?: string };
+}
+const { sim, title, options = {}, keys = { toggle: 'play / pause', next: 'step' } } = Astro.props;
+---
+
+<pfh-sim
+  class="pfh-card sim"
+  data-sim={sim}
+  data-options={JSON.stringify(options)}
+  tabindex="0"
+  aria-label={`${title}: interactive simulation`}
+>
+  <div class="pfh-card-title">{title}</div>
+  <slot name="intro" />
+  <div class="sim-narr" data-part="narrator" aria-live="polite">
+    <span class="ph">Loading</span>
+    <b class="t">{title}</b>
+    <p data-part="loading">Getting the simulation ready…</p>
+  </div>
+  <slot />
+  <p class="sim-keys">
+    Keys (click the sim first):
+    {keys.toggle && <><kbd>Space</kbd> {keys.toggle}</>}
+    {keys.next && <> · <kbd>→</kbd> {keys.next}</>}
+    {keys.back && <> · <kbd>←</kbd> {keys.back}</>}
+  </p>
+</pfh-sim>
+
+<script>
+  import './island';
+</script>

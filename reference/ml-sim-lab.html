@@ -1,0 +1,877 @@
+<title>ML Sim Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a lab notebook. One reading column; each prototype is a bench card: sim, narrator caption, controls, spec strip. */
+:root{
+  --bg:#f3f5f6; --surface:#ffffff; --sunk:#e9edf0; --ink:#14202b; --muted:#56636f; --line:#d3dbe1;
+  --amber:#c46200; --teal:#0d8279; --plum:#9a3a8e; --bad:#c0262d;
+  --heat-lo:#fff9ec; --heat-hi:#8ea4b8;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f151b; --surface:#161f28; --sunk:#1d2833; --ink:#e4ebf0; --muted:#94a2ae; --line:#2b3946;
+  --amber:#ffa13d; --teal:#3cccc0; --plum:#e27ad6; --bad:#ff6b6b;
+  --heat-lo:#34506a; --heat-hi:#0d141a; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0f151b; --surface:#161f28; --sunk:#1d2833; --ink:#e4ebf0; --muted:#94a2ae; --line:#2b3946;
+  --amber:#ffa13d; --teal:#3cccc0; --plum:#e27ad6; --bad:#ff6b6b;
+  --heat-lo:#34506a; --heat-hi:#0d141a; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:17px; line-height:1.6; margin:0}
+.wrap{max-width:1000px; margin:0 auto; padding-inline:16px; padding-block:40px 80px}
+h1,h2,h3{font-family:var(--display); line-height:1.15; text-wrap:balance; margin:0}
+h1{font-size:clamp(2.2rem,6vw,3.6rem); font-weight:800; letter-spacing:-0.02em}
+h2{font-size:clamp(1.5rem,3.6vw,2rem); font-weight:700; margin-top:64px}
+h3{font-size:1.25rem; font-weight:700}
+p{margin:0; max-width:68ch}
+a{color:var(--teal)}
+code,.mono{font-family:var(--mono); font-size:0.86em}
+.eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted)}
+.stack{display:flex; flex-direction:column; gap:14px; min-width:0}
+.hero{display:flex; flex-direction:column; gap:18px; padding-bottom:8px}
+.hero .lede{font-size:1.15rem; color:var(--muted)}
+.verdict{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-top:8px}
+.verdict div{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:14px 16px; min-width:0}
+.verdict b{font-family:var(--display); font-size:1.05rem; display:block; margin-bottom:4px}
+.verdict span{color:var(--muted); font-size:0.95rem}
+.pill{display:inline-block; font-family:var(--mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase; padding:2px 8px; border-radius:99px; border:1px solid currentColor; white-space:nowrap}
+.ok{color:var(--teal)} .meh{color:var(--amber)} .no{color:var(--plum)}
+
+.bench{background:var(--surface); border:1px solid var(--line); border-radius:8px; margin-top:28px; overflow:hidden}
+.bench-head{padding:20px 20px 0; display:flex; flex-direction:column; gap:8px}
+.bench-body{padding:16px 20px 20px; display:flex; flex-direction:column; gap:14px}
+.spec{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); border-top:1px solid var(--line); background:var(--sunk)}
+.spec div{padding:12px 20px; font-size:0.9rem; min-width:0}
+.spec div + div{border-left:1px solid var(--line)}
+.spec dt{font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted)}
+.spec dd{margin:2px 0 0}
+canvas{display:block; width:100%; border-radius:4px; touch-action:manipulation}
+.controls{display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center}
+.controls label{display:flex; align-items:center; gap:8px; font-size:0.92rem; color:var(--muted)}
+button,select,input[type=number]{font:inherit; font-size:0.92rem; color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:5px; padding:6px 12px}
+button{cursor:pointer; font-weight:700}
+button.primary{background:var(--ink); color:var(--surface); border-color:var(--ink)}
+button:disabled{opacity:0.4; cursor:not-allowed}
+button:focus-visible,select:focus-visible,input:focus-visible,canvas:focus-visible{outline:2px solid var(--amber); outline-offset:2px}
+input[type=range]{accent-color:var(--amber); width:130px}
+.seg{display:inline-flex; border:1px solid var(--line); border-radius:5px; overflow:hidden}
+.seg button{border:0; border-radius:0; padding:6px 10px; font-weight:400; color:var(--muted)}
+.seg button + button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--sunk); color:var(--ink); font-weight:700}
+.readout{display:flex; flex-wrap:wrap; gap:6px 18px; font-family:var(--mono); font-size:13px; font-variant-numeric:tabular-nums}
+.sw{display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; vertical-align:middle}
+.hint{font-size:0.92rem; color:var(--muted)}
+.warn{color:var(--bad); font-weight:700}
+
+/* Narrator: the caption that explains every phase */
+.narr{border-left:4px solid var(--amber); background:var(--sunk); border-radius:0 6px 6px 0; padding:12px 16px; display:flex; flex-direction:column; gap:4px; min-height:118px}
+.narr .ph{font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber)}
+.narr b.t{font-family:var(--display); font-size:1.12rem}
+.narr p{font-size:0.97rem}
+.log{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px; font-size:0.9rem}
+.log li{padding:4px 0 4px 10px; border-left:2px solid var(--line)}
+.log li:first-child{border-left-color:var(--amber)}
+.log .mono{color:var(--muted); margin-right:6px}
+.log:empty::before{content:"Key moments will be logged here as they happen."; color:var(--muted); font-size:0.88rem}
+
+.two{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:20px; align-items:start}
+.conv-grid{display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); gap:20px; align-items:center}
+.conv-grid canvas{max-width:280px; margin:0 auto; cursor:pointer}
+.conv-grid #cv-in{cursor:default}
+.kernel{display:grid; grid-template-columns:repeat(3,60px); gap:4px}
+.kernel input{width:60px; text-align:center; font-family:var(--mono); padding:6px 2px}
+.kcol{display:flex; flex-direction:column; gap:10px; align-items:center; max-width:230px}
+.kdesc{font-size:0.85rem; color:var(--muted); text-align:center}
+.cap{font-family:var(--mono); font-size:12px; color:var(--muted); text-align:center; margin-top:6px}
+.explain{display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px 14px; padding:12px; background:var(--sunk); border-radius:6px}
+.mini{display:grid; grid-template-columns:repeat(3,42px); gap:3px}
+.mini span{height:34px; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:13px; background:var(--surface); border-radius:3px; transition:background .25s, color .25s}
+.mini span.lit{background:var(--ink); color:var(--surface)}
+.mini span.pos{background:var(--amber); color:var(--surface)}
+.mini span.neg{background:var(--teal); color:var(--surface)}
+.mini span.zero{color:var(--muted)}
+.mini.hidden span{color:transparent; background:var(--surface)}
+.op{font-family:var(--display); font-size:1.6rem; color:var(--muted)}
+.mcap{font-family:var(--mono); font-size:11px; color:var(--muted); text-align:center; margin-top:4px}
+.sumbox{font-family:var(--mono); font-size:1.1rem; font-weight:600; padding:8px 12px; border-radius:5px; background:var(--surface); min-width:70px; text-align:center}
+@media (max-width:760px){ .two,.conv-grid{grid-template-columns:minmax(0,1fr)} .kcol{max-width:none} }
+
+.scroll{overflow-x:auto}
+.graph{min-width:620px; width:100%; display:block}
+.graph .edge{stroke:var(--line); stroke-width:2.5; fill:none; transition:stroke .3s}
+.graph .edge.fwd{stroke:var(--amber); stroke-width:3.5}
+.graph .edge.bwd{stroke:var(--plum); stroke-width:3.5; stroke-dasharray:7 5}
+.graph .shape{fill:var(--surface); stroke:var(--ink); stroke-width:1.8; transition:stroke .3s, stroke-width .3s}
+.graph .focus .shape{stroke:var(--amber); stroke-width:4.5}
+.graph .lbl{fill:var(--ink); font-family:var(--display); font-weight:700; font-size:20px; text-anchor:middle; dominant-baseline:central}
+.graph .val{fill:var(--amber); font-family:var(--mono); font-size:14px; text-anchor:middle}
+.graph .grd{fill:var(--plum); font-family:var(--mono); font-size:14px; text-anchor:middle}
+.graph .nograd{fill:var(--muted)}
+.graph .dir{fill:var(--muted); font-family:var(--mono); font-size:12px}
+.code{background:var(--sunk); border-radius:6px; padding:10px 0; font-family:var(--mono); font-size:13px; overflow-x:auto}
+.code div{padding:1px 16px; white-space:pre; border-left:3px solid transparent; transition:background .2s}
+.code div.hl{background:var(--surface); border-left-color:var(--amber)}
+.code .c{color:var(--muted)}
+
+.tbl{overflow-x:auto; margin-top:16px; border:1px solid var(--line); border-radius:6px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:0.92rem; min-width:680px}
+th,td{text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:top}
+th{font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); background:var(--sunk)}
+tr:last-child td{border-bottom:none}
+td.tier{font-family:var(--mono); font-size:12px; color:var(--muted); white-space:nowrap}
+.list{margin:0; padding-left:1.2em; display:flex; flex-direction:column; gap:8px; max-width:72ch}
+.cols{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; margin-top:16px}
+.cols > div{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:16px 18px; display:flex; flex-direction:column; gap:8px; min-width:0}
+footer{margin-top:64px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:0.9rem}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+
+<div class="wrap">
+<header class="hero">
+  <span class="eyebrow">Feasibility study · interactive animations for the PyTorch course</span>
+  <h1>ML Sim Lab</h1>
+  <p class="lede">Can we teach ML with live animations that people can poke at in a browser tab, and can they actually follow what's happening? There are four working prototypes below. Each one has a narrator that explains every phase as it happens.</p>
+  <div class="verdict">
+    <div><b><span class="pill ok">Works</span> Live JS sims</b><span>Optimizers, backprop, convolution and live network training all run smoothly with no libraries.</span></div>
+    <div><b><span class="pill meh">Heavy</span> Real pretrained models</b><span>Possible with ONNX Runtime Web or Transformers.js, but the downloads are tens to hundreds of MB. Put them behind a button.</span></div>
+    <div><b><span class="pill no">Not possible</span> PyTorch in the browser</b><span>PyTorch still doesn't run in Pyodide. Use NumPy in the browser, and real PyTorch on Kaggle.</span></div>
+  </div>
+</header>
+
+<h2>Four working prototypes</h2>
+<p style="margin-top:12px">Every sim has a narrator box (the coloured caption) that says what is happening and why. Sims with stages can be stepped one at a time. The ones that run continuously have a speed control and a log of key moments.</p>
+
+<!-- ============ DEMO 1: BACKPROP (first: it's the most step-by-step) ============ -->
+<section class="bench" aria-labelledby="d4">
+  <div class="bench-head">
+    <span class="eyebrow">Foundations · Autograd · step-through</span>
+    <h3 id="d4">Backprop as a chain of blame</h3>
+    <p class="hint">A one-neuron model learns to output <b>7</b> when it sees <b>2</b>. Press <b>Next</b> to walk through one full training round: the forward pass, then the backward pass, then the update. Every step shows the actual arithmetic.</p>
+  </div>
+  <div class="bench-body">
+    <div class="narr" id="bp-narr" aria-live="polite"></div>
+    <div class="scroll"><svg class="graph" id="bp-svg" viewBox="0 0 760 390" role="img" aria-label="Computation graph: x and w feed a multiply node, then plus b, minus y, then squared to produce the loss L"></svg></div>
+    <div class="controls">
+      <button id="bp-back">Back</button>
+      <button class="primary" id="bp-next">Next</button>
+      <button id="bp-auto">Auto-play</button>
+      <span class="readout" id="bp-prog"></span>
+      <span style="flex:1"></span>
+      <button id="bp-skip">Skip 10 rounds</button>
+      <button id="bp-reset">Reset</button>
+    </div>
+    <div class="code" id="bp-code" aria-label="Equivalent PyTorch code">
+      <div>loss = (w * x + b - y) ** 2           <span class="c"># forward: compute + record the graph</span></div>
+      <div>loss.backward()                       <span class="c"># backward: fills w.grad and b.grad</span></div>
+      <div>with torch.no_grad():</div>
+      <div>    w -= lr * w.grad; b -= lr * b.grad   <span class="c"># update, lr = 0.02</span></div>
+      <div>w.grad.zero_(); b.grad.zero_()        <span class="c"># reset, or the next round's grads pile on top</span></div>
+    </div>
+    <div class="readout" id="bp-read"></div>
+  </div>
+  <dl class="spec">
+    <div><dt>Rendering</dt><dd>Inline SVG with CSS transitions. A script of 11 narrated steps is rebuilt from the live numbers each round.</dd></div>
+    <div><dt>Accuracy</dt><dd>The gradients follow the same chain rule PyTorch autograd uses. The numbers match <code>w.grad</code> and <code>b.grad</code> exactly.</dd></div>
+    <div><dt>Kaggle twin</dt><dd>The same five lines with <code>requires_grad=True</code> tensors, printing each <code>.grad</code>. The graph is drawn with <code>torchviz</code>.</dd></div>
+  </dl>
+</section>
+
+<!-- ============ DEMO 2: OPTIMIZERS ============ -->
+<section class="bench" aria-labelledby="d1">
+  <div class="bench-head">
+    <span class="eyebrow">Foundations · Optimizers · live</span>
+    <h3 id="d1">The optimizer race</h3>
+    <p class="hint">Three optimizers start at the same spot on a loss landscape shaped like a curved valley. Watch the narrator for the three phases and the log for key moments. Click the map to choose a new start, and drag the learning rate past 0.8 to see things blow up.</p>
+  </div>
+  <div class="bench-body">
+    <div class="narr" id="opt-narr" aria-live="polite"></div>
+    <div class="two">
+      <div class="stack">
+        <canvas id="opt-cv" tabindex="0" aria-label="Contour map of a curved valley loss landscape with three optimizer paths"></canvas>
+        <div class="readout" id="opt-read"></div>
+      </div>
+      <div class="stack">
+        <div><div class="eyebrow">loss per step</div><canvas id="opt-loss" aria-label="Loss over steps for the three optimizers, log scale"></canvas></div>
+        <div><div class="eyebrow" style="margin-bottom:6px">key moments</div><ul class="log" id="opt-log"></ul></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="primary" id="opt-play">Play</button>
+      <button id="opt-step">Step</button>
+      <button id="opt-reset">Reset</button>
+      <div class="seg" id="opt-speed" role="group" aria-label="speed"><button aria-pressed="false">Slow</button><button aria-pressed="true">Normal</button><button aria-pressed="false">Fast</button></div>
+      <label for="opt-lr">learning rate <input type="range" id="opt-lr" min="0" max="100" value="50"> <span class="mono" id="opt-lr-v">0.100</span></label>
+    </div>
+  </div>
+  <dl class="spec">
+    <div><dt>Rendering</dt><dd>Canvas 2D: the heatmap is cached, while trails, gradient arrows and the loss chart redraw each step.</dd></div>
+    <div><dt>Accuracy</dt><dd>Update rules match <code>torch.optim.SGD</code>, <code>SGD(momentum=0.9)</code> and <code>Adam</code> with default betas.</dd></div>
+    <div><dt>Kaggle twin</dt><dd>Real <code>torch.optim</code> runs on the same function, with paths shown as a Plotly animation (play and slider work in a published notebook).</dd></div>
+  </dl>
+</section>
+
+<!-- ============ DEMO 3: CONVOLUTION ============ -->
+<section class="bench" aria-labelledby="d3">
+  <div class="bench-head">
+    <span class="eyebrow">Intermediate · CNNs · step-through</span>
+    <h3 id="d3">Convolution, one window at a time</h3>
+    <p class="hint">A 3×3 kernel slides over a 12×12 picture of the letter A. In <b>Slow</b> mode each window plays in three beats: place it, multiply, add up. The strip under the grids shows the real arithmetic. <b>Click any output pixel</b> to see how it was computed.</p>
+  </div>
+  <div class="bench-body">
+    <div class="narr" id="cv-narr" aria-live="polite"></div>
+    <div class="conv-grid">
+      <div><canvas id="cv-in" aria-label="Input image grid with the sliding kernel window"></canvas><div class="cap">input 12×12 (1 = ink, 0 = blank)</div></div>
+      <div class="kcol">
+        <label for="cv-preset" class="hint" style="display:flex;gap:8px;align-items:center">kernel <select id="cv-preset">
+          <option value="vedge">vertical edges</option><option value="hedge">horizontal edges</option><option value="outline">outline</option><option value="blur">blur</option><option value="sharpen">sharpen</option><option value="identity">identity</option><option value="custom">custom</option>
+        </select></label>
+        <div class="kernel" id="cv-k"></div>
+        <div class="kdesc" id="cv-kdesc"></div>
+      </div>
+      <div><canvas id="cv-out" aria-label="Output feature map. Amber is positive, teal is negative. Click a pixel to inspect it."></canvas><div class="cap">output 10×10 · <span style="color:var(--amber)">amber +</span> · <span style="color:var(--teal)">teal −</span></div></div>
+    </div>
+    <div class="explain" aria-label="Arithmetic for the current window">
+      <div><div class="mini" id="cv-m-patch"></div><div class="mcap">patch</div></div>
+      <span class="op">×</span>
+      <div><div class="mini" id="cv-m-k"></div><div class="mcap">kernel</div></div>
+      <span class="op">=</span>
+      <div><div class="mini" id="cv-m-prod"></div><div class="mcap">products</div></div>
+      <span class="op">→ Σ</span>
+      <div><div class="sumbox" id="cv-sum">?</div><div class="mcap">output pixel</div></div>
+    </div>
+    <div class="controls">
+      <button class="primary" id="cv-play">Play</button>
+      <button id="cv-step">Step</button>
+      <button id="cv-jump">Next interesting window</button>
+      <button id="cv-restart">Restart</button>
+      <div class="seg" id="cv-speed" role="group" aria-label="speed"><button aria-pressed="true">Slow</button><button aria-pressed="false">Normal</button><button aria-pressed="false">Fast</button></div>
+    </div>
+  </div>
+  <dl class="spec">
+    <div><dt>Rendering</dt><dd>Canvas 2D grids plus an HTML arithmetic strip that updates each beat.</dd></div>
+    <div><dt>Accuracy</dt><dd>Like <code>F.conv2d</code>, the kernel is not flipped (technically this is cross-correlation), with stride 1 and no padding, so the output is 12 − 3 + 1 = 10.</dd></div>
+    <div><dt>Kaggle twin</dt><dd><code>F.conv2d</code> on a real MNIST digit with the same kernels, then the learned filters of a trained CNN.</dd></div>
+  </dl>
+</section>
+
+<!-- ============ DEMO 4: NN ============ -->
+<section class="bench" aria-labelledby="d2">
+  <div class="bench-head">
+    <span class="eyebrow">Foundations · Your first neural network · live</span>
+    <h3 id="d2">Watch a network learn</h3>
+    <p class="hint">A real network with 2 hidden layers trains here, using backprop and Adam written in plain JS. <b>Shading</b> is the network's guess for every spot on the map, and darker means more confident. The <b>solid line</b> is its decision boundary. <b>Red rings</b> mark points it currently gets wrong.</p>
+  </div>
+  <div class="bench-body">
+    <div class="narr" id="nn-narr" aria-live="polite"></div>
+    <div class="two">
+      <canvas id="nn-cv" aria-label="Two classes of points with the network's decision regions and boundary line"></canvas>
+      <div class="stack">
+        <div class="readout" id="nn-read"></div>
+        <div><div class="eyebrow">loss per epoch</div><canvas id="nn-loss" aria-label="Training loss over epochs"></canvas></div>
+        <div><div class="eyebrow" style="margin-bottom:6px">key moments</div><ul class="log" id="nn-log"></ul></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="primary" id="nn-play">Play</button>
+      <button id="nn-step">1 epoch</button>
+      <button id="nn-reset">Reset</button>
+      <div class="seg" id="nn-speed" role="group" aria-label="speed"><button aria-pressed="false">Slow</button><button aria-pressed="true">Normal</button><button aria-pressed="false">Fast</button></div>
+      <label for="nn-ds">data <select id="nn-ds"><option value="circle">circle</option><option value="xor">xor</option><option value="spiral">spiral</option></select></label>
+      <label for="nn-h">neurons <select id="nn-h"><option>2</option><option>4</option><option selected>8</option><option>16</option></select></label>
+      <label for="nn-act">activation <select id="nn-act"><option>tanh</option><option>relu</option></select></label>
+      <label for="nn-lr">learning rate <input type="range" id="nn-lr" min="0" max="100" value="62"> <span class="mono" id="nn-lr-v"></span></label>
+    </div>
+  </div>
+  <dl class="spec">
+    <div><dt>Rendering</dt><dd>Canvas 2D: a 50×50 prediction grid is upscaled for the shading, and the boundary is traced with marching squares.</dd></div>
+    <div><dt>Accuracy</dt><dd>2 → N → N → 1 network with sigmoid output, binary cross-entropy loss and full-batch Adam. Equivalent to <code>nn.Sequential</code> + <code>BCEWithLogitsLoss</code>.</dd></div>
+    <div><dt>Kaggle twin</dt><dd>The identical network as an <code>nn.Module</code>, with boundary snapshots saved as Plotly animation frames.</dd></div>
+  </dl>
+</section>
+
+<!-- ============ RULES ============ -->
+<h2>Animation rules for every course sim</h2>
+<p style="margin-top:12px">These came straight from your feedback that people couldn't follow the first version. They become part of the lesson template.</p>
+<div class="cols">
+  <div><h3>Narrate every phase</h3><p>A caption box always says what is happening right now and why it matters, in plain words. It updates on every step or phase change.</p></div>
+  <div><h3>Slow by default, steppable always</h3><p>Anything with stages gets Next and Back buttons. Anything continuous gets a speed control and a Step button. Nothing autoplays.</p></div>
+  <div><h3>Show the numbers behind the picture</h3><p>The arithmetic strip in the convolution sim, the gradient values in backprop, and the loss charts. The picture builds intuition and the numbers make it trustworthy.</p></div>
+  <div><h3>Annotate on the canvas</h3><p>Downhill arrows, the dashed valley floor, the decision line, rings around mistakes. Put labels where the eye already is.</p></div>
+  <div><h3>Log key moments</h3><p>Overshoots, divergence, zigzags, accuracy milestones. Each gets a timestamp so learners can look back after missing something.</p></div>
+  <div><h3>One thing changes at a time</h3><p>Highlight the one active node, window or phase. Everything else stays still and muted.</p></div>
+</div>
+
+<!-- ============ TECH ============ -->
+<h2>Rendering toolbox: what to use when</h2>
+<p style="margin-top:12px">Pick the lightest tool that does the job. Most lessons only ever need the first three rows.</p>
+<div class="tbl"><table>
+  <thead><tr><th>Technique</th><th>Best for</th><th>Limits</th><th>Verdict</th></tr></thead>
+  <tbody>
+    <tr><td><b>SVG + CSS transitions</b></td><td>Diagrams, computation graphs, tensor blocks, step-through explanations</td><td>Slows down past a couple of thousand elements</td><td><span class="pill ok">Default</span></td></tr>
+    <tr><td><b>Canvas 2D</b></td><td>Heatmaps, trails, scatter plots, anything that trains live</td><td>You handle hit-testing and accessibility yourself</td><td><span class="pill ok">Default</span></td></tr>
+    <tr><td><b>Plain-JS math</b></td><td>Small networks, optimizers, convolutions, attention on toy vectors</td><td>It's a re-implementation, so it must be checked against PyTorch (see below)</td><td><span class="pill ok">Default</span></td></tr>
+    <tr><td><b>WebGL (Three.js / regl)</b></td><td>3D loss surfaces, embedding clouds, thousands of particles</td><td>Large library; browsers limit live GL contexts, so share one</td><td><span class="pill meh">Sparingly</span></td></tr>
+    <tr><td><b>Pyodide (Python + NumPy in WASM)</b></td><td>Editable "build it from scratch" code cells</td><td>Several MB and a multi-second first load; no PyTorch</td><td><span class="pill meh">Lazy-load</span></td></tr>
+    <tr><td><b>ONNX Runtime Web / Transformers.js</b></td><td>Real pretrained models: a CNN reading your drawing, GPT-2 next-token predictions</td><td>Downloads of tens to hundreds of MB; WebGPU speeds it up where available</td><td><span class="pill meh">Opt-in</span></td></tr>
+    <tr><td><b>Pre-rendered video (Manim)</b></td><td>Cinematic maths moments</td><td>Not interactive, but it also embeds in Kaggle</td><td><span class="pill meh">Garnish</span></td></tr>
+    <tr><td><b>Real PyTorch in the browser</b></td><td>Nothing yet</td><td>No Pyodide build exists; its cffi requirement is a long-standing blocker</td><td><span class="pill no">No</span></td></tr>
+  </tbody>
+</table></div>
+
+<!-- ============ MATRIX ============ -->
+<h2>Concept-by-concept feasibility</h2>
+<p style="margin-top:12px">My picks for each tier. Effort means build effort, not how hard the concept is to learn.</p>
+<div class="tbl"><table>
+  <thead><tr><th>Tier</th><th>Concept</th><th>Sim idea (the "aha")</th><th>Tech</th><th>Effort</th></tr></thead>
+  <tbody>
+    <tr><td class="tier">Found.</td><td>Tensors &amp; reshape</td><td>Numbered cells flow from a 2×6 grid into 3×4, then 3×2×2, so you see that memory order never changes</td><td>SVG</td><td><span class="pill ok">Easy</span></td></tr>
+    <tr><td class="tier">Found.</td><td>Broadcasting</td><td>A small tensor makes ghost copies of itself to match the big one. A shape mismatch flashes red with the real error text</td><td>SVG</td><td><span class="pill ok">Easy</span></td></tr>
+    <tr><td class="tier">Found.</td><td>Matrix multiply</td><td>A row sweeps across a column and the dot product fills one cell, with the same arithmetic strip as the convolution sim</td><td>SVG</td><td><span class="pill ok">Easy</span></td></tr>
+    <tr><td class="tier">Found.</td><td>Gradient descent</td><td>A ball on a curve with a tangent line and a learning-rate slider (the pilot lesson)</td><td>Canvas</td><td><span class="pill ok">Easy</span></td></tr>
+    <tr><td class="tier">Found.</td><td>Autograd</td><td>Built above: a chain of blame</td><td>SVG</td><td><span class="pill ok">Built</span></td></tr>
+    <tr><td class="tier">Found.</td><td>Linear regression</td><td>Drag data points and watch the best-fit line and the MSE squares react</td><td>Canvas</td><td><span class="pill ok">Easy</span></td></tr>
+    <tr><td class="tier">Found.</td><td>Overfitting</td><td>A polynomial-degree slider; train loss falls while validation loss turns back up</td><td>Canvas</td><td><span class="pill ok">Easy</span></td></tr>
+    <tr><td class="tier">Found.</td><td>Neural net training</td><td>Built above: live decision boundary</td><td>Canvas + JS</td><td><span class="pill ok">Built</span></td></tr>
+    <tr><td class="tier">Inter.</td><td>Activations</td><td>Plot each activation and its slope; stack 10 sigmoid layers and watch the gradient fade to nothing</td><td>Canvas</td><td><span class="pill ok">Easy</span></td></tr>
+    <tr><td class="tier">Inter.</td><td>Optimizers</td><td>Built above: the race</td><td>Canvas</td><td><span class="pill ok">Built</span></td></tr>
+    <tr><td class="tier">Inter.</td><td>Convolution</td><td>Built above: sliding kernel</td><td>Canvas</td><td><span class="pill ok">Built</span></td></tr>
+    <tr><td class="tier">Inter.</td><td>CNN on your drawing</td><td>Draw a digit and see the feature maps of a real trained model, layer by layer</td><td>ONNX Web</td><td><span class="pill meh">Medium</span></td></tr>
+    <tr><td class="tier">Inter.</td><td>Batch norm</td><td>Histograms of activations drifting, then snapping back to mean 0 and std 1</td><td>Canvas</td><td><span class="pill ok">Easy</span></td></tr>
+    <tr><td class="tier">Inter.</td><td>Embeddings</td><td>A 3D word cloud (precomputed): king − man + woman as actual arrows</td><td>WebGL</td><td><span class="pill meh">Medium</span></td></tr>
+    <tr><td class="tier">Inter.</td><td>Loss landscape 3D</td><td>The optimizer race replayed on a rotatable 3D surface</td><td>WebGL</td><td><span class="pill meh">Medium</span></td></tr>
+    <tr><td class="tier">Adv.</td><td>Self-attention</td><td>Hover a word to see its query hit every key; the softmax heatmap updates as you edit the sentence</td><td>SVG + JS</td><td><span class="pill meh">Medium</span></td></tr>
+    <tr><td class="tier">Adv.</td><td>Tokenization (BPE)</td><td>Watch merges happen step by step on your own text</td><td>JS</td><td><span class="pill ok">Easy</span></td></tr>
+    <tr><td class="tier">Adv.</td><td>Live GPT-2</td><td>Type a prompt and see next-token probabilities and temperature effects</td><td>Transformers.js</td><td><span class="pill no">Hard</span></td></tr>
+    <tr><td class="tier">Adv.</td><td>Mixed precision</td><td>A bit-level float visualizer showing fp32 vs fp16 vs bf16, and where your number overflows</td><td>JS</td><td><span class="pill ok">Easy</span></td></tr>
+    <tr><td class="tier">Adv.</td><td>LoRA</td><td>A big weight matrix shown next to two skinny matrices, with a parameter counter</td><td>SVG</td><td><span class="pill ok">Easy</span></td></tr>
+    <tr><td class="tier">Adv.</td><td>Diffusion</td><td>A noise slider on a real image; denoising is replayed from precomputed frames</td><td>Canvas</td><td><span class="pill meh">Medium</span></td></tr>
+    <tr><td class="tier">Adv.</td><td>Distributed training</td><td>4 "GPUs" each crunch a batch, then all-reduce averages the gradients</td><td>SVG</td><td><span class="pill ok">Easy</span></td></tr>
+  </tbody>
+</table></div>
+
+<!-- ============ ARCH ============ -->
+<h2>How this plugs into the Astro site</h2>
+<div class="cols">
+  <div><h3>One sim = one module</h3><p>Each sim is framework-free TypeScript exporting <code>mount(el, options)</code> and returning a <code>destroy()</code>. Astro loads it with <code>client:visible</code>.</p></div>
+  <div><h3>A shared sim kit</h3><p>Narrator box, event log, speed control, Back/Next stepper, theme-token reader, HiDPI canvas sizing, and a pause when scrolled away. Build it once and every sim gets it.</p></div>
+  <div><h3>Correctness guardrail</h3><p>A Python script in CI computes reference values with real PyTorch (gradients, conv outputs, optimizer steps) and saves them as JSON. JS unit tests must match them, so no sim teaches wrong maths.</p></div>
+  <div><h3>Weight budget</h3><p>Under about 100 KB of JS per lesson. Pyodide loads on the first "Run" click, in a Web Worker. Model downloads sit behind a button that shows the size.</p></div>
+  <div><h3>Accessibility</h3><p>The narrator is an <code>aria-live</code> region, so screen readers hear every phase. Controls are keyboard-operable, and reduced motion skips transitions.</p></div>
+  <div><h3>Kaggle side</h3><p>Published Kaggle notebooks are static, so use Plotly animation frames or matplotlib <code>to_jshtml()</code>. Put the narration in markdown cells between the frames.</p></div>
+</div>
+
+<h2>Prior art worth studying</h2>
+<ul class="list" style="margin-top:16px">
+  <li><a href="https://arxiv.org/html/2004.15004v3" target="_blank" rel="noopener">CNN Explainer</a> runs a pretrained CNN in the browser and moves smoothly between the overview and the maths.</li>
+  <li><a href="https://arxiv.org/html/2408.04619" target="_blank" rel="noopener">Transformer Explainer</a> runs live GPT-2 in the browser and reached about 490k users.</li>
+  <li><a href="https://github.com/Machine-Learning-Tokyo/Interactive_Tools" target="_blank" rel="noopener">Interactive Tools collection</a> is a big index of existing ML visualizers. Check it before building.</li>
+</ul>
+
+<footer>
+  Prototypes are self-contained: plain JS, no libraries. The PyTorch-in-browser verdict is based on Pyodide's documented cffi blocker; re-check when Pyodide releases new versions.
+</footer>
+</div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const hex = c => { c = c.replace('#',''); if (c.length === 3) c = c.split('').map(x=>x+x).join(''); return [0,2,4].map(i=>parseInt(c.slice(i,i+2),16)); };
+let T = {};
+const themeListeners = [];
+function readTheme(){
+  T = { ink:css('--ink'), muted:css('--muted'), line:css('--line'), surface:css('--surface'), sunk:css('--sunk'), bad:css('--bad'),
+        amber:css('--amber'), teal:css('--teal'), plum:css('--plum'), lo:hex(css('--heat-lo')), hi:hex(css('--heat-hi')) };
+  themeListeners.forEach(f => f());
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readTheme);
+new MutationObserver(readTheme).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+
+function fit(cv, aspect){
+  const w = cv.clientWidth || 300, h = Math.round(w * aspect), d = window.devicePixelRatio || 1;
+  cv.width = Math.round(w*d); cv.height = Math.round(h*d); cv.style.height = h + 'px';
+  const ctx = cv.getContext('2d'); ctx.setTransform(d,0,0,d,0,0);
+  return {ctx, w, h};
+}
+function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function gauss(r){ let u = 0; while (!u) u = r(); return Math.sqrt(-2*Math.log(u)) * Math.cos(2*Math.PI*r()); }
+const logSlider = (v, lo, hi) => Math.pow(10, lo + (hi-lo) * v/100);
+const f2 = v => (Math.round(v*100)/100).toFixed(2);
+function visibility(el, cb){ new IntersectionObserver(es => es.forEach(e => cb(e.isIntersecting)), {threshold:0.05}).observe(el); }
+function narrate(el, ph, title, body){ el.innerHTML = `<span class="ph">${ph}</span><b class="t">${title}</b><p>${body}</p>`; }
+function logTo(el, tag, html){ const li = document.createElement('li'); li.innerHTML = `<span class="mono">${tag}</span>${html}`; el.prepend(li); while (el.children.length > 5) el.lastChild.remove(); }
+function seg(el, values, cb){ const bs = [...el.children]; bs.forEach((b,i) => b.onclick = () => { bs.forEach((x,j) => x.setAttribute('aria-pressed', String(i===j))); cb(values[i]); }); }
+function arrow(ctx, x1, y1, x2, y2, col, w){
+  ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  const a = Math.atan2(y2-y1, x2-x1), h = 7; ctx.beginPath(); ctx.moveTo(x2,y2);
+  ctx.lineTo(x2 - h*Math.cos(a-0.45), y2 - h*Math.sin(a-0.45)); ctx.lineTo(x2 - h*Math.cos(a+0.45), y2 - h*Math.sin(a+0.45)); ctx.closePath(); ctx.fill();
+}
+// shared chart: axes, gridlines, labels
+function chartFrame(c, W, H, pad, yTicks, yFmt, xMax, yMap){
+  c.clearRect(0,0,W,H); c.fillStyle = T.sunk; c.fillRect(0,0,W,H);
+  c.font = '11px "JetBrains Mono", monospace'; c.textBaseline = 'middle';
+  yTicks.forEach(v => { const y = yMap(v); c.strokeStyle = T.line; c.lineWidth = 1; c.beginPath(); c.moveTo(pad.l, y); c.lineTo(W-pad.r, y); c.stroke();
+    c.fillStyle = T.muted; c.textAlign = 'right'; c.fillText(yFmt(v), pad.l-6, y); });
+  c.textAlign = 'center'; c.textBaseline = 'top';
+  [0, Math.round(xMax/2), xMax].forEach(v => c.fillText(String(v), pad.l + v/xMax*(W-pad.l-pad.r), H-pad.b+5));
+}
+
+/* ================= BACKPROP ================= */
+const BP = (() => {
+  const svg = $('#bp-svg'), NS = 'http://www.w3.org/2000/svg', X = 2, Y = 7, LR = 0.02, narr = $('#bp-narr');
+  const N = {
+    x:{x:70,y:62,leaf:1,lbl:'x'}, w:{x:70,y:178,leaf:1,lbl:'w'}, mul:{x:220,y:120,lbl:'×',v:'z'},
+    b:{x:220,y:250,leaf:1,lbl:'b'}, add:{x:370,y:182,lbl:'+',v:'p'}, y:{x:370,y:300,leaf:1,lbl:'y'},
+    sub:{x:520,y:240,lbl:'−',v:'e'}, sq:{x:665,y:240,lbl:'²',v:'L'} };
+  const E = [['x','mul'],['w','mul'],['mul','add'],['b','add'],['add','sub'],['y','sub'],['sub','sq']];
+  const el = (tag, at, parent) => { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); (parent||svg).appendChild(e); return e; };
+  const edgeEl = {};
+  E.forEach(([s,t]) => edgeEl[s+t] = el('line', {class:'edge', x1:N[s].x, y1:N[s].y, x2:N[t].x, y2:N[t].y}));
+  for (const k in N){ const n = N[k], g = el('g', {}); n.g = g;
+    if (n.leaf) el('rect', {class:'shape', x:n.x-34, y:n.y-20, width:68, height:40, rx:6}, g);
+    else el('circle', {class:'shape', cx:n.x, cy:n.y, r:28}, g);
+    el('text', {class:'lbl', x:n.x, y:n.y}, g).textContent = n.lbl;
+    n.val = el('text', {class:'val', x:n.x, y:n.y + (n.leaf ? 40 : 48)}, g);
+    n.grd = el('text', {class:'grd', x:n.x, y:n.y + (n.leaf ? 60 : 68)}, g); }
+  const dirF = el('text', {class:'dir', x:20, y:372}); dirF.textContent = '';
+  let w = 1, b = 0.5, round = 1, idx = 0, steps = [], losses = [], auto = null, note = '';
+
+  function build(){
+    const z = w*X, p = z + b, e = p - Y, L = e*e, g = 2*e, gw = g*X, w2 = w - LR*gw, b2 = b - LR*g;
+    const V = {x:X, w, b, y:Y, mul:z, add:p, sub:e, sq:L}, G = {sq:1, sub:g, add:g, mul:g, b:g, w:gw};
+    const setupBody = round === 1
+      ? `We want <code>w·x + b</code> to output <b>7</b> when x = <b>2</b>. Right now w = ${f2(w)} and b = ${f2(b)}. <b>x</b> and <b>y</b> are data and never change. <b>w</b> and <b>b</b> are the knobs training is allowed to turn (they have <code>requires_grad=True</code>).`
+      : `${note} Last round's loss was <b>${f2(losses[losses.length-1])}</b>. The knobs are now w = ${f2(w)}, b = ${f2(b)}. Let's see whether the loss went down.`;
+    steps = [
+      {ph:`Round ${round} · setup`, t: round === 1 ? 'Meet the model' : 'New round, updated knobs', b:setupBody, vals:['x','w','b','y'], focus:['w','b'], code: round === 1 ? [] : [4]},
+      {ph:'Forward 1 of 4', t:'Multiply', b:`The first node multiplies its two inputs: z = w × x = ${f2(w)} × 2 = <b>${f2(z)}</b>. Values flow left to right (amber).`, vals:['mul'], fe:['xmul','wmul'], focus:['mul'], code:[0]},
+      {ph:'Forward 2 of 4', t:'Add the bias', b:`p = z + b = ${f2(z)} + ${f2(b)} = <b>${f2(p)}</b>. This is the model's <b>prediction</b>. The right answer is 7.`, vals:['add'], fe:['muladd','badd'], focus:['add'], code:[0]},
+      {ph:'Forward 3 of 4', t:'How wrong are we?', b:`e = p − y = ${f2(p)} − 7 = <b>${f2(e)}</b>. ${e < 0 ? 'Negative means the prediction is too <b>low</b>.' : 'Positive means the prediction is too <b>high</b>.'}`, vals:['sub'], fe:['addsub','ysub'], focus:['sub'], code:[0]},
+      {ph:'Forward 4 of 4', t:'Turn the error into a loss', b:`L = e² = (${f2(e)})² = <b>${f2(L)}</b>. Squaring makes the error positive and punishes big misses much more than small ones. Training has one job: make this number small.`, vals:['sq'], fe:['subsq'], focus:['sq'], code:[0]},
+      {ph:'Backward 1 of 5', t:'Start at the end', b:`Now we go right to left (plum, dashed). Each node answers one question: <i>"if my value wiggled up by a tiny bit, how much would L change?"</i> That is its gradient. L's answer about itself is simply <b>1</b>.`, grads:['sq'], focus:['sq'], code:[1]},
+      {ph:'Backward 2 of 5', t:'Square rule', b:`For L = e², the slope is 2e. So ∂L/∂e = 2 × ${f2(e)} = <b>${f2(g)}</b>. ${g < 0 ? 'Negative means that <i>increasing</i> e would <i>decrease</i> the loss. Makes sense, since e is too low.' : 'Positive means that decreasing e would decrease the loss.'}`, grads:['sub'], be:['subsq'], focus:['sub'], code:[1]},
+      {ph:'Backward 3 of 5', t:'Subtraction passes it straight through', b:`e = p − y, so raising p by 1 raises e by exactly 1. The gradient passes through unchanged: ∂L/∂p = <b>${f2(g)}</b>.`, grads:['add'], be:['addsub'], focus:['add'], code:[1]},
+      {ph:'Backward 4 of 5', t:'Addition copies it to both inputs', b:`p = z + b, and both inputs count equally, so both receive the same gradient: ∂L/∂z = ∂L/∂b = <b>${f2(g)}</b>. That's <code>b.grad</code> done.`, grads:['mul','b'], be:['muladd','badd'], focus:['mul','b'], code:[1]},
+      {ph:'Backward 5 of 5', t:'Multiplication uses the other input', b:`z = w × x, so raising w by 1 raises z by x (that is, 2). Chain rule: ∂L/∂w = ∂L/∂z × x = ${f2(g)} × 2 = <b>${f2(gw)}</b>. That's <code>w.grad</code>. x and y are data, so they get no gradient.`, grads:['w'], be:['wmul'], focus:['w'], nograd:true, code:[1]},
+      {ph:`Round ${round} · update`, t:'Nudge each knob against its gradient', b:`w ← w − lr × ∂L/∂w = ${f2(w)} − 0.02 × (${f2(gw)}) = <b>${f2(w2)}</b><br>b ← b − lr × ∂L/∂b = ${f2(b)} − 0.02 × (${f2(g)}) = <b>${f2(b2)}</b><br>${gw < 0 ? 'The gradients are negative, so subtracting them <i>raises</i> w and b, which pushes the prediction up toward 7.' : 'The gradients are positive, so subtracting them lowers w and b, which pulls the prediction down toward 7.'} Press Next to apply this and start round ${round+1}.`, focus:['w','b'], code:[2,3], keep:true}
+    ];
+    steps.V = V; steps.G = G; steps.L = L; steps.next = [w2, b2];
+  }
+  function render(){
+    const s = steps[idx], V = steps.V, G = steps.G;
+    for (const k in N){ N[k].val.textContent = ''; N[k].grd.textContent = ''; N[k].grd.classList.remove('nograd'); N[k].g.classList.remove('focus'); }
+    for (const k in edgeEl) edgeEl[k].setAttribute('class', 'edge');
+    const backward = idx >= 5;
+    for (let i=0;i<=idx;i++){ const st = steps[i];
+      (st.vals||[]).forEach(k => N[k].val.textContent = (N[k].v ? N[k].v + ' = ' : '= ') + f2(V[k]));
+      (st.grads||[]).forEach(k => N[k].grd.textContent = '∂L/∂' + (N[k].v || N[k].lbl) + ' = ' + f2(G[k]));
+      if (!backward) (st.fe||[]).forEach(e => edgeEl[e].setAttribute('class','edge fwd'));
+      else (st.be||[]).forEach(e => edgeEl[e].setAttribute('class','edge bwd'));
+      if (st.nograd || (idx === 10)) ['x','y'].forEach(k => { N[k].grd.textContent = 'data, no grad'; N[k].grd.classList.add('nograd'); });
+    }
+    if (idx === 10) ['sq','sub','add','mul','b','w'].forEach(k => N[k].grd.textContent = '∂L/∂' + (N[k].v || N[k].lbl) + ' = ' + f2(G[k]));
+    (s.focus||[]).forEach(k => N[k].g.classList.add('focus'));
+    dirF.textContent = idx === 0 ? '' : backward ? '◀ gradients flow right to left' : 'values flow left to right ▶';
+    [...$('#bp-code').children].forEach((d,j) => d.classList.toggle('hl', (s.code||[]).includes(j)));
+    narrate(narr, s.ph, s.t, s.b);
+    $('#bp-prog').textContent = `step ${idx+1} of ${steps.length}`;
+    $('#bp-back').disabled = idx === 0;
+    $('#bp-next').textContent = idx === steps.length-1 ? 'Apply update' : 'Next';
+    const hist = losses.slice(-7).map(f2);
+    $('#bp-read').innerHTML = `<span>round ${round}</span><span>w = ${f2(w)}, b = ${f2(b)}</span>` + (hist.length ? `<span>loss by round: ${hist.join(' → ')}${idx >= 4 ? ' → ' + f2(steps.L) : ''}</span>` : '');
+  }
+  function next(){
+    if (idx < steps.length-1){ idx++; render(); return; }
+    losses.push(steps.L); [w, b] = steps.next; round++; idx = 0;
+    note = 'Update applied, and both gradients were reset to zero (otherwise PyTorch would add the next round\'s gradients on top).';
+    build(); render();
+  }
+  function stopAuto(){ if (auto){ clearInterval(auto); auto = null; $('#bp-auto').textContent = 'Auto-play'; } }
+  $('#bp-next').onclick = () => { stopAuto(); next(); };
+  $('#bp-back').onclick = () => { stopAuto(); if (idx > 0){ idx--; render(); } };
+  $('#bp-auto').onclick = () => { if (auto) return stopAuto(); $('#bp-auto').textContent = 'Pause'; next(); auto = setInterval(next, 3200); };
+  $('#bp-skip').onclick = () => { stopAuto(); const from = (() => { build(); return steps.L; })();
+    for (let i=0;i<10;i++){ build(); losses.push(steps.L); [w, b] = steps.next; round++; }
+    note = `Skipped ahead 10 rounds of forward, backward and update. Loss went from ${f2(from)} to ${f2(losses[losses.length-1])}, and it keeps shrinking as the prediction closes in on 7.`;
+    idx = 0; build(); render(); };
+  $('#bp-reset').onclick = () => { stopAuto(); w = 1; b = 0.5; round = 1; idx = 0; losses = []; note = ''; build(); render(); };
+  themeListeners.push(() => {});
+  return { init(){ build(); render(); } };
+})();
+
+/* ================= OPTIMIZER RACE ================= */
+const Opt = (() => {
+  const cv = $('#opt-cv'), lc = $('#opt-loss'), narr = $('#opt-narr'), logEl = $('#opt-log');
+  const X0=-6, X1=6, Y0=-3, Y1=3;
+  const floorY = x => 0.6*Math.sin(x);
+  const f = (x,y) => 0.05*x*x + 1.2*(y - floorY(x))**2;
+  const grad = (x,y) => { const r = y - floorY(x); return [0.1*x - 1.44*r*Math.cos(x), 2.4*r]; };
+  const opts = [
+    {name:'SGD', c:'amber', blurb:'step = lr × gradient'},
+    {name:'Momentum', c:'teal', blurb:'remembers past steps, builds speed'},
+    {name:'Adam', c:'plum', blurb:'rescales steps by recent gradient size'}];
+  let sx = -5.2, sy = 2.2, lr = 0.1, step = 0, running = false, visible = true, rate = 8, acc = 0, prevT = 0;
+  let ctx, W, H, lctx, LW, LH, heat = null, moved = false;
+  const px = x => (x - X0)/(X1 - X0)*W, py = y => (1 - (y - Y0)/(Y1 - Y0))*H;
+  function reset(){
+    opts.forEach(o => Object.assign(o, {x:sx, y:sy, vx:0, vy:0, mx:0, my:0, s2x:0, s2y:0, t:0, dead:false, path:[[sx,sy]], losses:[f(sx,sy)],
+      floor:false, over:false, zig:0, zigLogged:false, lastDy:0, arrived:false}));
+    step = 0; logEl.innerHTML = '';
+  }
+  const log = html => logTo(logEl, `step ${step}`, html);
+  function stepAll(){
+    step++;
+    opts.forEach(o => {
+      if (o.dead) return;
+      const [gx, gy] = grad(o.x, o.y), oy = o.y; o.t++;
+      if (o.name === 'SGD'){ o.x -= lr*gx; o.y -= lr*gy; }
+      else if (o.name === 'Momentum'){ o.vx = 0.9*o.vx + gx; o.vy = 0.9*o.vy + gy; o.x -= lr*o.vx; o.y -= lr*o.vy; }
+      else { const b1=0.9, b2=0.999; o.mx=b1*o.mx+(1-b1)*gx; o.my=b1*o.my+(1-b1)*gy; o.s2x=b2*o.s2x+(1-b2)*gx*gx; o.s2y=b2*o.s2y+(1-b2)*gy*gy;
+             const c1=1-b1**o.t, c2=1-b2**o.t; o.x -= lr*(o.mx/c1)/(Math.sqrt(o.s2x/c2)+1e-8); o.y -= lr*(o.my/c1)/(Math.sqrt(o.s2y/c2)+1e-8); }
+      if (!isFinite(o.x) || !isFinite(o.y) || Math.abs(o.x) > 40 || Math.abs(o.y) > 40){
+        o.dead = true; log(`<b>${o.name}</b> blew up. Each step overshot further than the last. This learning rate is too big for it.`); return; }
+      o.path.push([o.x, o.y]); const L = f(o.x, o.y), prevL = o.losses[o.losses.length-1]; o.losses.push(L);
+      const dy = o.y - oy;
+      if (!o.floor && Math.abs(o.y - floorY(o.x)) < 0.08){ o.floor = true; log(`<b>${o.name}</b> reached the valley floor. The slope here is gentle, so progress slows down.`); }
+      if (!o.over && step > 2 && L > prevL*1.0001 && prevL > 0.01){ o.over = true;
+        log(o.name === 'Momentum' ? `<b>Momentum</b> overshot, and its loss went <i>up</i>. Like a heavy ball, it rolled past the low point and will swing back.` : `<b>${o.name}</b>'s loss went up. It stepped past the low point.`); }
+      if (Math.abs(dy) > 0.005){ if (o.lastDy && Math.sign(dy) !== Math.sign(o.lastDy)) o.zig++; else o.zig = 0; o.lastDy = dy; }
+      if (o.zig >= 3 && !o.zigLogged){ o.zigLogged = true; log(`<b>${o.name}</b> is zigzagging between the valley walls. The walls are steep, so each step overshoots sideways.`); }
+      if (!o.arrived && L < 0.01){ o.arrived = true; log(`<b>${o.name}</b> reached the minimum (loss below 0.01) in <b>${step} steps</b>.`); }
+    });
+    if (step >= 500 || opts.every(o => o.dead || o.arrived)) setRun(false);
+  }
+  function phase(){
+    const alive = opts.filter(o => !o.dead);
+    if (step === 0) return narrate(narr, moved ? 'New start point' : 'Ready', 'Same start, same learning rate, three strategies',
+      'Each dot is a model with two weights, and its position on the map <i>is</i> those two weights. The colour is the loss: <b>lighter means lower</b>, and the ✕ marks the lowest point. The small arrow on each dot points straight downhill, which is the negative gradient. Press <b>Step</b> a few times, then <b>Play</b>.');
+    if (!alive.length) return narrate(narr, 'Game over', 'Everyone diverged', 'The learning rate is so big that each step lands somewhere steeper than the last, so the steps keep growing. Drag the slider back to about 0.1 and press Reset.');
+    if (alive.some(o => !o.floor)) return narrate(narr, 'Phase 1 of 3', 'Falling into the valley',
+      'The valley walls are steep, so the gradients are big and so are the steps. The arrows point mostly <i>sideways</i>, toward the valley floor (dashed line), not toward the ✕. Gradient descent only ever sees the local slope, never the destination.');
+    if (alive.some(o => !o.arrived)) return narrate(narr, 'Phase 2 of 3', 'Crawling along the valley floor',
+      '<b>SGD</b>: the gradient is small down here, so its steps are small and it slows to a crawl. <b>Momentum</b> keeps the speed it built up, so it moves faster but can overshoot. <b>Adam</b> divides each step by the recent gradient size, so its steps stay about the same size even on gentle slopes. Watch the loss chart: the curve that drops fastest is winning.');
+    narrate(narr, 'Phase 3 of 3', 'Everyone made it', 'Check the log for who arrived first (at lr 0.1: Momentum, then Adam, then SGD). Then push the learning rate toward 1: SGD is the first to blow up, because its step is directly proportional to the steep wall\'s gradient.');
+  }
+  function buildHeat(){
+    const d = window.devicePixelRatio || 1, w = Math.round(W*d), h = Math.round(H*d);
+    const off = document.createElement('canvas'); off.width = w; off.height = h;
+    const o = off.getContext('2d'), img = o.createImageData(w, h), fmax = Math.log1p(18);
+    for (let j=0;j<h;j++) for (let i=0;i<w;i++){
+      const x = X0 + i/w*(X1-X0), y = Y1 - j/h*(Y1-Y0), lv = Math.log1p(f(x,y));
+      const band = (lv*5) % 1, t = Math.min(1, lv/fmax + (band < 0.06 ? 0.15 : 0)), k = (j*w+i)*4;
+      for (let c=0;c<3;c++) img.data[k+c] = T.lo[c] + (T.hi[c]-T.lo[c])*t;
+      img.data[k+3] = 255;
+    }
+    o.putImageData(img, 0, 0); heat = off;
+  }
+  function draw(){
+    if (!heat) buildHeat();
+    ctx.drawImage(heat, 0, 0, W, H);
+    // valley floor
+    ctx.setLineDash([5,5]); ctx.strokeStyle = T.muted; ctx.lineWidth = 1.5; ctx.beginPath();
+    for (let i=0;i<=120;i++){ const x = X0 + i/120*(X1-X0); i ? ctx.lineTo(px(x), py(floorY(x))) : ctx.moveTo(px(x), py(floorY(x))); }
+    ctx.stroke(); ctx.setLineDash([]);
+    ctx.font = '12px "JetBrains Mono", monospace'; ctx.fillStyle = T.muted; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText('valley floor', px(3.4), py(floorY(3.4)) + 18);
+    // minimum
+    const mx = px(0), my = py(0); ctx.strokeStyle = T.ink; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(mx-7,my-7); ctx.lineTo(mx+7,my+7); ctx.moveTo(mx+7,my-7); ctx.lineTo(mx-7,my+7); ctx.stroke();
+    ctx.fillStyle = T.ink; ctx.fillText('lowest loss', mx+10, my-10);
+    ctx.beginPath(); ctx.arc(px(sx), py(sy), 7, 0, 7); ctx.strokeStyle = T.ink; ctx.lineWidth = 1.5; ctx.stroke(); ctx.fillText('start', px(sx)+10, py(sy)-10);
+    opts.forEach(o => {
+      const col = T[o.c]; ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.lineJoin = 'round';
+      ctx.beginPath(); o.path.forEach(([x,y],i) => i ? ctx.lineTo(px(x),py(y)) : ctx.moveTo(px(x),py(y))); ctx.stroke();
+      o.path.forEach(([x,y],i) => { if (i && i < o.path.length-1){ ctx.beginPath(); ctx.arc(px(x),py(y),1.8,0,7); ctx.fillStyle = col; ctx.fill(); } });
+    });
+    opts.forEach(o => {
+      if (o.dead) return; const col = T[o.c], X = px(o.x), Yp = py(o.y);
+      const [gx, gy] = grad(o.x, o.y), m = Math.hypot(gx, gy);
+      if (m > 1e-4) arrow(ctx, X, Yp, X - gx/m*30, Yp + gy/m*30, col, 2);
+      ctx.beginPath(); ctx.arc(X, Yp, 7, 0, 7); ctx.fillStyle = col; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = T.surface; ctx.stroke();
+    });
+    drawLoss(); phase();
+    $('#opt-read').innerHTML = `<span>step ${step}</span>` + opts.map(o =>
+      `<span><i class="sw" style="background:${T[o.c]}"></i><b>${o.name}</b> (${o.blurb}): ${o.dead ? '<span class="warn">diverged</span>' : 'loss ' + f(o.x,o.y).toFixed(4)}</span>`).join('');
+  }
+  function drawLoss(){
+    const pad = {l:44, r:10, t:10, b:22}, xMax = Math.max(60, Math.ceil(step/20)*20), lo = -3, hi = 1.5;
+    const yMap = v => pad.t + (1 - (Math.log10(v) - lo)/(hi - lo))*(LH - pad.t - pad.b);
+    chartFrame(lctx, LW, LH, pad, [10, 1, 0.1, 0.01, 0.001], v => String(v), xMax, yMap);
+    opts.forEach(o => { lctx.strokeStyle = T[o.c]; lctx.lineWidth = 2; lctx.beginPath();
+      o.losses.forEach((L,i) => { const X = pad.l + i/xMax*(LW-pad.l-pad.r), Yv = yMap(Math.min(Math.max(L, 1e-3), 30)); i ? lctx.lineTo(X,Yv) : lctx.moveTo(X,Yv); });
+      lctx.stroke(); });
+  }
+  function resize(){ ({ctx, w:W, h:H} = fit(cv, 0.5)); ({ctx:lctx, w:LW, h:LH} = fit(lc, 0.55)); heat = null; draw(); }
+  function loop(ts){
+    if (!running || !visible) return;
+    acc += (ts - prevT)/1000*rate; prevT = ts;
+    let n = Math.min(Math.floor(acc), 8); acc -= n; if (n) { while (n-- && running) stepAll(); draw(); }
+    requestAnimationFrame(loop);
+  }
+  function setRun(v){ running = v; $('#opt-play').textContent = v ? 'Pause' : 'Play'; if (v){ prevT = performance.now(); acc = 1; requestAnimationFrame(loop); } }
+  $('#opt-play').onclick = () => { if (!running && opts.every(o => o.dead || o.arrived)) { reset(); } setRun(!running); };
+  $('#opt-step').onclick = () => { setRun(false); stepAll(); draw(); };
+  $('#opt-reset').onclick = () => { setRun(false); reset(); draw(); };
+  seg($('#opt-speed'), [3, 8, 30], v => rate = v);
+  $('#opt-lr').oninput = e => { lr = logSlider(+e.target.value, -2, 0);
+    $('#opt-lr-v').innerHTML = lr.toFixed(3) + (lr > 0.8 ? ' <span class="warn">chaos zone</span>' : ''); };
+  cv.addEventListener('click', e => { const r = cv.getBoundingClientRect();
+    sx = X0 + (e.clientX - r.left)/r.width*(X1-X0); sy = Y1 - (e.clientY - r.top)/r.height*(Y1-Y0); moved = true; setRun(false); reset(); draw(); });
+  visibility(cv, v => { visible = v; if (v && running){ prevT = performance.now(); requestAnimationFrame(loop); } });
+  new ResizeObserver(resize).observe(cv);
+  themeListeners.push(() => { heat = null; if (ctx) draw(); });
+  return { init(){ reset(); resize(); } };
+})();
+
+/* ================= CONVOLUTION ================= */
+const Conv = (() => {
+  const IMG = [
+    "............",
+    ".....##.....",
+    "....#..#....",
+    "...#....#...",
+    "...#....#...",
+    "..#......#..",
+    "..########..",
+    "..#......#..",
+    ".#........#.",
+    ".#........#.",
+    "............",
+    "............"];
+  const S = 12, O = S - 2, img = IMG.map(r => [...r].map(c => c === '#' ? 1 : 0)), narr = $('#cv-narr');
+  const P = { vedge:[-1,0,1,-2,0,2,-1,0,1], hedge:[-1,-2,-1,0,0,0,1,2,1], outline:[-1,-1,-1,-1,8,-1,-1,-1,-1],
+              blur:Array(9).fill(1/9), sharpen:[0,-1,0,-1,5,-1,0,-1,0], identity:[0,0,0,0,1,0,0,0,0] };
+  const DESC = {
+    vedge:'Looks for <b>vertical edges</b>: the left column is negative and the right is positive, so it fires when ink sits on the right side of the window and not the left.',
+    hedge:'Looks for <b>horizontal edges</b>: the top row is negative and the bottom is positive, so it fires when ink sits below and not above.',
+    outline:'Fires when the <b>centre differs from its 8 neighbours</b>. In a flat area (all ink or all blank) the weights cancel out to 0.',
+    blur:'<b>Averages</b> the 9 pixels: each one counts 1/9. Everything gets softer.',
+    sharpen:'Boosts the centre ×5 and subtracts its 4 neighbours, which <b>exaggerates differences</b>.',
+    identity:'Copies just the centre pixel, so the output is the input with its border trimmed off.',
+    custom:'Your own kernel. A positive weight rewards ink in that spot and a negative weight punishes it.' };
+  let K = P.vedge.slice(), kname = 'vedge', out = [], maxAbs = 1, pos = -1, sub = 2, running = false, acc = 0, prevT = 0, speed = 'slow';
+  const BEAT = {slow:900, normal:320, fast:70};
+  const cin = $('#cv-in'), cout = $('#cv-out'); let a, b;
+  const kEl = $('#cv-k'), inputs = [];
+  const mk = id => { const el = $(id); for (let i=0;i<9;i++) el.appendChild(document.createElement('span')); return [...el.children]; };
+  const mPatch = mk('#cv-m-patch'), mK = mk('#cv-m-k'), mProd = mk('#cv-m-prod');
+  for (let i=0;i<9;i++){ const inp = document.createElement('input'); inp.type = 'number'; inp.step = '0.5'; inp.id = 'cv-k' + i; inp.setAttribute('aria-label', `kernel row ${Math.floor(i/3)+1} column ${i%3+1}`);
+    inp.oninput = () => { const v = parseFloat(inp.value); if (!isNaN(v)){ K[i] = v; kname = 'custom'; $('#cv-preset').value = 'custom'; compute(); draw(); } };
+    kEl.appendChild(inp); inputs.push(inp); }
+  const fmt = v => Math.abs(v - Math.round(v)) < 1e-9 ? String(Math.round(v)) : v.toFixed(2);
+  function syncInputs(){ inputs.forEach((inp,i) => inp.value = fmt(K[i])); $('#cv-kdesc').innerHTML = DESC[kname]; }
+  function compute(){ out = []; for (let i=0;i<O;i++) for (let j=0;j<O;j++){ let s = 0; for (let u=0;u<3;u++) for (let v=0;v<3;v++) s += img[i+u][j+v]*K[u*3+v]; out.push(s); }
+    maxAbs = Math.max(1e-9, ...out.map(Math.abs)); syncInputs(); }
+  const done = () => pos >= O*O;
+  function draw(){
+    const active = pos >= 0 && !done(), r = Math.floor(pos/O), q = pos%O;
+    // input
+    const c = a.w/S; a.ctx.clearRect(0,0,a.w,a.h);
+    for (let i=0;i<S;i++) for (let j=0;j<S;j++){ a.ctx.fillStyle = img[i][j] ? T.ink : T.sunk; a.ctx.fillRect(j*c+0.5, i*c+0.5, c-1, c-1); }
+    if (active){ a.ctx.fillStyle = T.amber; a.ctx.globalAlpha = 0.28; a.ctx.fillRect(q*c, r*c, 3*c, 3*c); a.ctx.globalAlpha = 1;
+      a.ctx.strokeStyle = T.amber; a.ctx.lineWidth = 3; a.ctx.strokeRect(q*c+1.5, r*c+1.5, 3*c-3, 3*c-3); }
+    // output
+    const d = b.w/O; b.ctx.clearRect(0,0,b.w,b.h);
+    const pc = hex(T.amber), nc = hex(T.teal), base = hex(T.sunk);
+    for (let k=0;k<O*O;k++){ const rr = Math.floor(k/O), qq = k%O; let col = base;
+      const shown = pos < 0 ? false : done() || k < pos || (k === pos && sub === 2);
+      if (shown){ const v = out[k]/maxAbs, tgt = v >= 0 ? pc : nc, t = Math.min(1, Math.abs(v)); col = base.map((x,ci) => Math.round(x + (tgt[ci]-x)*t)); }
+      b.ctx.fillStyle = `rgb(${col.join(',')})`; b.ctx.fillRect(qq*d+0.5, rr*d+0.5, d-1, d-1); }
+    if (active){ b.ctx.strokeStyle = T.ink; b.ctx.lineWidth = 2.5; b.ctx.strokeRect(q*d+1.5, r*d+1.5, d-3, d-3); }
+    // arithmetic strip
+    const pr = active ? r : 0, pq = active ? q : 0;
+    let terms = [], lit = 0;
+    for (let i=0;i<9;i++){ const u = Math.floor(i/3), v = i%3, pv = active ? img[pr+u][pq+v] : 0, kv = K[i], prod = pv*kv;
+      mPatch[i].textContent = active ? pv : '·'; mPatch[i].className = pv ? 'lit' : '';
+      mK[i].textContent = fmt(kv); mK[i].className = kv > 0 ? 'pos' : kv < 0 ? 'neg' : 'zero';
+      mProd[i].textContent = fmt(prod); mProd[i].className = prod > 0 ? 'pos' : prod < 0 ? 'neg' : 'zero';
+      if (pv){ lit++; if (kv) terms.push(fmt(kv)); } }
+    $('#cv-m-prod').classList.toggle('hidden', !active || sub < 1);
+    $('#cv-sum').textContent = active && sub === 2 ? fmt(out[pos]) : '?';
+    // narration
+    if (pos < 0) return narrate(narr, 'Ready', 'A kernel is a tiny 3×3 pattern detector',
+      `It slides across the image one pixel at a time. At every stop it multiplies the 9 pixels under it by its 9 weights and adds them up, and that sum becomes one output pixel. ${DESC[kname]} Press <b>Step</b> to go one beat at a time.`);
+    if (done()) return narrate(narr, 'Done · 100 windows', 'The feature map is complete',
+      `A 3×3 window fits in 12 − 3 + 1 = 10 positions across and 10 down, giving a 10×10 output. ${kname === 'vedge' ? 'The slanted sides lit up, amber on one side of each stroke and teal on the other, while the middle of the crossbar stayed 0: this kernel ignores horizontal lines.' : kname === 'hedge' ? 'The crossbar lit up strongly, amber along its top edge and teal along its bottom edge, while the slanted sides respond only weakly.' : 'Amber means a strong positive response and teal a strong negative one.'} A CNN <i>learns</i> dozens of kernels like this instead of having them hand-picked. Click any output pixel to inspect it.`);
+    const s = out[pos], where = `rows ${r+1}–${r+3}, columns ${q+1}–${q+3}`, ph = `Window ${pos+1} of 100`;
+    const expr = terms.length ? terms.join(' + ').replace(/\+ -/g, '− ') : '0';
+    let meaning;
+    if (!lit) meaning = 'The patch is empty (all 0s), so every product is 0. Nothing to see here.';
+    else if (Math.abs(s) < 1e-9) meaning = `There is ink here, but the positive and negative weights <b>cancel out</b> to 0. The kernel doesn't care about this pattern.`;
+    else if (s > 0) meaning = `<b>Positive (${fmt(s)})</b>: this patch looks like what the kernel is searching for, so the output pixel turns amber.`;
+    else meaning = `<b>Negative (${fmt(s)})</b>: the opposite pattern${kname === 'vedge' ? ' (ink on the left, not the right)' : kname === 'hedge' ? ' (ink on top, not below)' : ''}, so the output pixel turns teal.`;
+    if (sub === 0) narrate(narr, ph + ' · beat 1: place', 'Place the window', `The kernel sits over input ${where}. It covers ${lit} inked pixel${lit === 1 ? '' : 's'} (shown as 1s in the patch grid below).`);
+    else if (sub === 1) narrate(narr, ph + ' · beat 2: multiply', 'Multiply pixel by weight', `Each of the 9 pixels is multiplied by the weight sitting on top of it. Blank pixels are 0, so only the ${lit} inked one${lit === 1 ? '' : 's'} can contribute.`);
+    else narrate(narr, ph + ' · beat 3: add up', 'Add the products', `${expr} = <b>${fmt(s)}</b>. That becomes output pixel (row ${r+1}, col ${q+1}). ${meaning}`);
+  }
+  function advance(){
+    if (done()){ pos = 0; sub = 0; return; }
+    if (pos < 0){ pos = 0; sub = 0; return; }
+    if (speed !== 'slow' && running){ pos++; sub = 2; return; }
+    if (sub < 2) sub++; else { pos++; sub = 0; }
+  }
+  function resize(){ a = fit(cin, 1); b = fit(cout, 1); draw(); }
+  function tick(ts){ if (!running) return; acc += ts - prevT; prevT = ts;
+    if (acc >= BEAT[speed]){ acc = 0; advance(); if (done()) setRun(false); draw(); }
+    requestAnimationFrame(tick); }
+  function setRun(v){ running = v; $('#cv-play').textContent = v ? 'Pause' : 'Play'; if (v){ if (done() || pos < 0){ pos = 0; sub = speed === 'slow' ? 0 : 2; draw(); } prevT = performance.now(); acc = 0; requestAnimationFrame(tick); } }
+  $('#cv-play').onclick = () => setRun(!running);
+  $('#cv-step').onclick = () => { setRun(false); advance(); draw(); };
+  $('#cv-restart').onclick = () => { setRun(false); pos = -1; sub = 2; draw(); };
+  $('#cv-jump').onclick = () => { setRun(false); let p = (pos < 0 || done()) ? 0 : pos + 1;
+    while (p < O*O && Math.abs(out[p]) < 1e-9) p++; pos = p >= O*O ? O*O : p; sub = 2; draw(); };
+  seg($('#cv-speed'), ['slow','normal','fast'], v => speed = v);
+  cout.addEventListener('click', e => { const r = cout.getBoundingClientRect();
+    const q = Math.floor((e.clientX - r.left)/r.width*O), rr = Math.floor((e.clientY - r.top)/r.height*O);
+    if (q >= 0 && q < O && rr >= 0 && rr < O){ setRun(false); pos = rr*O + q; sub = 2; draw(); } });
+  $('#cv-preset').onchange = e => { kname = e.target.value; if (P[kname]) K = P[kname].slice(); compute(); draw(); };
+  new ResizeObserver(resize).observe(cin);
+  themeListeners.push(() => { if (a) draw(); });
+  return { init(){ compute(); resize(); } };
+})();
+
+/* ================= NEURAL NET ================= */
+const NN = (() => {
+  const cv = $('#nn-cv'), lc = $('#nn-loss'), narr = $('#nn-narr'), logEl = $('#nn-log');
+  let data = [], net = [], epoch = 0, t = 0, hist = [], running = false, visible = true, milestones = new Set();
+  let lr = 0.03, Hn = 8, actName = 'tanh', ds = 'circle', rate = 25, acc = 0, prevT = 0, last = [0,0], wrong = [];
+  let ctx, W, H, lctx, LW, LH;
+  const DOM = 1.2, G = 50, pv = new Float64Array(G*G);
+  function genData(kind){
+    const r = rng(42), pts = [], N = 200;
+    if (kind === 'circle') for (let i=0;i<N;i++){ const inner = i < N/2, rad = inner ? r()*0.45 : 0.65 + r()*0.3, a = r()*2*Math.PI; pts.push([rad*Math.cos(a), rad*Math.sin(a), inner ? 1 : 0]); }
+    else if (kind === 'xor') for (let i=0;i<N;i++){ let x = r()*2-1, y = r()*2-1; x += x > 0 ? 0.08 : -0.08; y += y > 0 ? 0.08 : -0.08; pts.push([x*0.9, y*0.9, x*y > 0 ? 1 : 0]); }
+    else for (let i=0;i<N/2;i++){ const s = i/(N/2), rad = 0.1 + 0.85*s, ang = s*2*Math.PI*1.1;
+      for (const c of [0,1]){ const a = ang + c*Math.PI; pts.push([rad*Math.sin(a) + (r()-0.5)*0.08, rad*Math.cos(a) + (r()-0.5)*0.08, c]); } }
+    return pts;
+  }
+  function build(){
+    const r = rng(7); data = genData(ds); const sizes = [2, Hn, Hn, 1]; net = [];
+    for (let i=1;i<sizes.length;i++){
+      const n = sizes[i], m = sizes[i-1], z = () => new Float64Array(n*m), zb = () => new Float64Array(n);
+      const L = {n, m, W:z(), b:zb(), gW:z(), gb:zb(), mW:z(), vW:z(), mb:zb(), vb:zb()};
+      const scale = Math.sqrt((actName === 'relu' && i < sizes.length-1 ? 2 : 1)/m);
+      for (let k=0;k<n*m;k++) L.W[k] = gauss(r)*scale;
+      net.push(L);
+    }
+    epoch = 0; t = 0; hist = []; milestones = new Set(); logEl.innerHTML = '';
+    evaluate();
+  }
+  const act = z => actName === 'tanh' ? Math.tanh(z) : (z > 0 ? z : 0);
+  const dact = a => actName === 'tanh' ? 1 - a*a : (a > 0 ? 1 : 0);
+  function fwd(x, y){
+    let a = [x, y]; const as = [a];
+    for (let li=0; li<net.length; li++){
+      const L = net[li], lastL = li === net.length-1, o = new Array(L.n);
+      for (let j=0;j<L.n;j++){ let s = L.b[j]; for (let k=0;k<L.m;k++) s += L.W[j*L.m+k]*a[k]; o[j] = lastL ? 1/(1+Math.exp(-s)) : act(s); }
+      a = o; as.push(a);
+    }
+    return as;
+  }
+  function evaluate(){
+    let loss = 0, correct = 0; wrong = [];
+    for (const pt of data){ const p = fwd(pt[0], pt[1])[3][0], pc = Math.min(Math.max(p, 1e-7), 1-1e-7);
+      loss += -(pt[2]*Math.log(pc) + (1-pt[2])*Math.log(1-pc)); if ((p > 0.5) === (pt[2] === 1)) correct++; else wrong.push(pt); }
+    last = [loss/data.length, correct/data.length];
+  }
+  function trainEpoch(){
+    for (const L of net){ L.gW.fill(0); L.gb.fill(0); }
+    for (const [x, y, c] of data){
+      const as = fwd(x, y), p = as[as.length-1][0];
+      let delta = [p - c]; // d(BCE)/d(logit) for a sigmoid output
+      for (let li=net.length-1; li>=0; li--){
+        const L = net[li], aPrev = as[li], nd = li > 0 ? new Array(L.m).fill(0) : null;
+        for (let j=0;j<L.n;j++){ const d = delta[j]; L.gb[j] += d;
+          for (let k=0;k<L.m;k++){ L.gW[j*L.m+k] += d*aPrev[k]; if (nd) nd[k] += L.W[j*L.m+k]*d; } }
+        if (nd){ for (let k=0;k<L.m;k++) nd[k] *= dact(aPrev[k]); delta = nd; }
+      }
+    }
+    const N = data.length, b1 = 0.9, b2 = 0.999; t++; const c1 = 1 - b1**t, c2 = 1 - b2**t;
+    const adam = (p, g, m, v) => { for (let i=0;i<p.length;i++){ const gi = g[i]/N; m[i] = b1*m[i] + (1-b1)*gi; v[i] = b2*v[i] + (1-b2)*gi*gi; p[i] -= lr*(m[i]/c1)/(Math.sqrt(v[i]/c2) + 1e-8); } };
+    for (const L of net){ adam(L.W, L.gW, L.mW, L.vW); adam(L.b, L.gb, L.mb, L.vb); }
+    epoch++; evaluate(); hist.push(last[0]);
+    for (const m of [0.75, 0.9, 1]) if (last[1] >= m - 1e-9 && !milestones.has(m)){ milestones.add(m);
+      logTo(logEl, `epoch ${epoch}`, m === 1 ? 'Every point is on the correct side: <b>100% accuracy</b>.' : `Accuracy passed <b>${m*100}%</b>. ${wrong.length} points still wrong.`); }
+    if (epoch === 1) logTo(logEl, 'epoch 1', 'First weight update. The boundary moved for the first time.');
+  }
+  function phase(){
+    if (epoch === 0) return narrate(narr, 'Epoch 0 · untrained', 'Random weights, random guesses',
+      `The network starts with random weights, so the boundary line is just wherever chance put it. ${wrong.length} of 200 points are on the wrong side (ringed in red). Press <b>1 epoch</b> to see a single learning step, or <b>Play</b>.`);
+    if (last[1] >= 0.995) return narrate(narr, `Epoch ${epoch} · solved`, 'Every point is on the right side',
+      'The boundary is already correct. Loss still drifts down because the network keeps getting more <i>confident</i>: the shading gets darker, but the line barely moves. Now try harder data or fewer neurons.');
+    const n = hist.length;
+    if (n > 200 && Math.abs(hist[n-1] - hist[n-101]) / hist[n-101] < 0.02) return narrate(narr, `Epoch ${epoch} · plateau`, 'Stuck: the loss has stopped improving',
+      Hn <= 2 ? `With only ${Hn} neurons per layer, the network can only bend its boundary a little. It is <b>too simple</b> for this data (underfitting). Switch to 8 neurons.` : 'It might be stuck in a flat region. Try a bigger learning rate or more neurons, then Reset.');
+    if (epoch <= 10) return narrate(narr, `Epoch ${epoch} · first steps`, 'The biggest changes happen first',
+      'Nearly everything is wrong at the start, so the gradients are large and every weight gets a big nudge. Each epoch: <b>predict</b> all 200 points, <b>measure</b> the loss, <b>backprop</b>, then <b>nudge</b> every weight.');
+    const back = Math.max(0, n - 25);
+    narrate(narr, `Epoch ${epoch} · learning`, hist[back] - last[0] > 0.02 ? 'Learning: the loss is falling' : 'Fine-tuning: slow, steady progress',
+      `Loss went from ${hist[back].toFixed(3)} to ${last[0].toFixed(3)} over the last ${n - back} epochs. ${wrong.length} point${wrong.length === 1 ? '' : 's'} still on the wrong side. Watch the boundary bend around the red-ringed ones.`);
+  }
+  const off = document.createElement('canvas'); off.width = G; off.height = G; const octx = off.getContext('2d'); const img = octx.createImageData(G, G);
+  function draw(){
+    const s0 = hex(T.surface), c0 = hex(T.teal), c1 = hex(T.amber);
+    for (let j=0;j<G;j++) for (let i=0;i<G;i++){
+      const x = -DOM + (i+0.5)/G*2*DOM, y = DOM - (j+0.5)/G*2*DOM, p = fwd(x, y)[3][0]; pv[j*G+i] = p - 0.5;
+      const tgt = p > 0.5 ? c1 : c0, a = Math.min(1, Math.abs(p - 0.5)*2)*0.55, k = (j*G+i)*4;
+      for (let c=0;c<3;c++) img.data[k+c] = s0[c] + (tgt[c]-s0[c])*a; img.data[k+3] = 255;
+    }
+    octx.putImageData(img, 0, 0); ctx.imageSmoothingEnabled = true; ctx.drawImage(off, 0, 0, W, H);
+    // decision boundary via marching squares on p = 0.5
+    const gx = i => (i+0.5)/G*W, gy = j => (j+0.5)/G*H, v = (i,j) => pv[j*G+i];
+    ctx.beginPath();
+    for (let j=0;j<G-1;j++) for (let i=0;i<G-1;i++){
+      const A = v(i,j), B = v(i+1,j), C = v(i+1,j+1), D = v(i,j+1), pts = [];
+      if ((A > 0) !== (B > 0)) pts.push([gx(i + A/(A-B)), gy(j)]);
+      if ((B > 0) !== (C > 0)) pts.push([gx(i+1), gy(j + B/(B-C))]);
+      if ((D > 0) !== (C > 0)) pts.push([gx(i + D/(D-C)), gy(j+1)]);
+      if ((A > 0) !== (D > 0)) pts.push([gx(i), gy(j + A/(A-D))]);
+      if (pts.length >= 2){ ctx.moveTo(...pts[0]); ctx.lineTo(...pts[1]); }
+      if (pts.length === 4){ ctx.moveTo(...pts[2]); ctx.lineTo(...pts[3]); }
+    }
+    ctx.strokeStyle = T.ink; ctx.lineWidth = 2.5; ctx.stroke();
+    const px = x => (x + DOM)/(2*DOM)*W, py = y => (1 - (y + DOM)/(2*DOM))*H;
+    for (const [x, y, c] of data){ ctx.beginPath(); ctx.arc(px(x), py(y), 4.2, 0, 7); ctx.fillStyle = c ? T.amber : T.teal; ctx.fill(); ctx.lineWidth = 1.2; ctx.strokeStyle = T.ink; ctx.stroke(); }
+    for (const [x, y] of wrong){ ctx.beginPath(); ctx.arc(px(x), py(y), 8, 0, 7); ctx.lineWidth = 2; ctx.strokeStyle = T.bad; ctx.stroke(); }
+    // loss chart
+    const pad = {l:40, r:10, t:10, b:22}, xMax = Math.max(100, Math.ceil(epoch/100)*100), yMax = Math.max(0.8, Math.ceil((hist[0] || 0.8)*10)/10);
+    const yMap = q => pad.t + (1 - q/yMax)*(LH - pad.t - pad.b);
+    chartFrame(lctx, LW, LH, pad, [0, yMax/2, yMax], q => q.toFixed(2), xMax, yMap);
+    if (hist.length > 1){ lctx.beginPath(); const step = Math.max(1, Math.floor(hist.length/400));
+      for (let i=0;i<hist.length;i+=step){ const X = pad.l + (i+1)/xMax*(LW-pad.l-pad.r), Yv = yMap(Math.min(hist[i], yMax)); i ? lctx.lineTo(X,Yv) : lctx.moveTo(X,Yv); }
+      lctx.strokeStyle = T.plum; lctx.lineWidth = 2; lctx.stroke(); }
+    $('#nn-read').innerHTML = `<span>epoch ${epoch}</span><span>loss ${last[0].toFixed(3)}</span><span>accuracy ${(last[1]*100).toFixed(0)}%</span><span>${wrong.length} wrong</span>`;
+    phase();
+  }
+  function resize(){ ({ctx, w:W, h:H} = fit(cv, 1)); ({ctx:lctx, w:LW, h:LH} = fit(lc, 0.45)); draw(); }
+  function loop(ts){ if (!running || !visible) return;
+    acc += (ts - prevT)/1000*rate; prevT = ts; let n = Math.min(Math.floor(acc), 30); acc -= n;
+    if (n){ while (n--) trainEpoch(); draw(); }
+    requestAnimationFrame(loop); }
+  function setRun(v){ running = v; $('#nn-play').textContent = v ? 'Pause' : 'Play'; if (v){ prevT = performance.now(); acc = 1; requestAnimationFrame(loop); } }
+  const rebuild = () => { setRun(false); build(); draw(); };
+  $('#nn-play').onclick = () => setRun(!running);
+  $('#nn-step').onclick = () => { setRun(false); trainEpoch(); draw(); };
+  $('#nn-reset').onclick = rebuild;
+  $('#nn-ds').onchange = e => { ds = e.target.value; rebuild(); };
+  $('#nn-h').onchange = e => { Hn = +e.target.value; rebuild(); };
+  $('#nn-act').onchange = e => { actName = e.target.value; rebuild(); };
+  seg($('#nn-speed'), [6, 25, 120], v => rate = v);
+  const setLr = v => { lr = logSlider(v, -3, -0.5); $('#nn-lr-v').textContent = lr.toFixed(4); };
+  $('#nn-lr').oninput = e => setLr(+e.target.value);
+  visibility(cv, v => { visible = v; if (v && running){ prevT = performance.now(); requestAnimationFrame(loop); } });
+  new ResizeObserver(resize).observe(cv);
+  themeListeners.push(() => { if (ctx) draw(); });
+  return { init(){ setLr(62); build(); resize(); } };
+})();
+
+readTheme();
+BP.init(); Opt.init(); Conv.init(); NN.init();
+})();
+</script>

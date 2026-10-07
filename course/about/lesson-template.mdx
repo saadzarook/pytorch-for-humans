@@ -33,3 +33,17 @@ Why the split? PyTorch has no official build that runs inside a web browser, so 
 - **Nothing is pasted.** Outputs on the page are generated from real runs, the notebook includes the same snippet files, and every number the prose quotes is computed and checked by the course's tests.
 
 Contributor docs (how to create a new lesson) live in the repository's `README.md` and `templates/lesson/`.
+
+## The sim standard
+
+Every interactive sim (see the [Sim gallery](../../gallery/)) follows the same rules, written up in full, with a pre-merge checklist, in `docs/SIM_STANDARD.md` in the course repository:
+
+1. **Narrate every phase**: a caption says what's happening right now and why it matters.
+2. **Slow by default, always steppable**: nothing autoplays. Staged sims get Back / Next; continuous sims get Step and a speed control.
+3. **Show the numbers behind the picture**: arithmetic, gradients, loss charts.
+4. **Label things on the canvas**: arrows, reference lines, rings around mistakes.
+5. **Log key moments** with their step or epoch number.
+6. **Change one thing at a time**: highlight the active element, keep the rest muted.
+7. **Be accessible**: the narrator is read out by screen readers, keyboard shortcuts work, reduced motion is respected, and it works on a phone in light and dark mode.
+
+And the correctness rule: every sim's maths is checked against real PyTorch, and every number its narration quotes is computed, never typed.

@@ -1,29 +1,218 @@
 {
   "$comment": "Single source of truth for this lesson's numbers. The sims read it directly; facts.py checks that every snippet's copy matches it (Python cells must stay self-contained, so they can't import it).",
   "delivery": {
-    "x": [0.5, 0.8, 1.0, 1.3, 1.5, 1.9, 2.2, 2.5, 2.8, 3.0, 3.3, 3.6],
-    "y": [11.7, 11.2, 13.5, 13.0, 16.4, 17.8, 18.4, 21.9, 20.9, 23.2, 25.3, 24.7],
+    "x": [
+      0.5,
+      0.8,
+      1.0,
+      1.3,
+      1.5,
+      1.9,
+      2.2,
+      2.5,
+      2.8,
+      3.0,
+      3.3,
+      3.6
+    ],
+    "y": [
+      11.7,
+      11.2,
+      13.5,
+      13.0,
+      16.4,
+      17.8,
+      18.4,
+      21.9,
+      20.9,
+      23.2,
+      25.3,
+      24.7
+    ],
     "xName": "distance",
     "yName": "minutes"
   },
   "chai": {
-    "x": [0.0, 0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 1.8, 2.0, 2.5],
-    "y": [41.0, 46.0, 47.0, 53.0, 54.0, 60.0, 61.0, 67.0, 70.0, 77.0],
+    "x": [
+      0.0,
+      0.2,
+      0.5,
+      0.8,
+      1.0,
+      1.2,
+      1.5,
+      1.8,
+      2.0,
+      2.5
+    ],
+    "y": [
+      41.0,
+      46.0,
+      47.0,
+      53.0,
+      54.0,
+      60.0,
+      61.0,
+      67.0,
+      70.0,
+      77.0
+    ],
     "xName": "rain_hours",
     "yName": "cups"
   },
   "contour": {
-    "start": { "w": 0, "b": 0 },
+    "start": {
+      "w": 0,
+      "b": 0
+    },
     "maxSteps": 400,
-    "view": { "w": [-1, 11], "b": [-4, 20], "x": [0, 4], "y": [0, 30] },
+    "view": {
+      "w": [
+        -1,
+        11
+      ],
+      "b": [
+        -4,
+        20
+      ],
+      "x": [
+        0,
+        4
+      ],
+      "y": [
+        0,
+        30
+      ]
+    },
     "xLabel": "distance (km) →",
     "yLabel": "minutes",
     "describe": "delivery takes {b} min + {w} min per km",
     "presets": [
-      { "id": "slow", "label": "🐢 Too slow", "lr": 0.01 },
-      { "id": "good", "label": "👌 Just right", "lr": 0.1 },
-      { "id": "zigzag", "label": "〰️ Zig-zag", "lr": 0.16 },
-      { "id": "chaos", "label": "🔥 Chaos mode", "lr": 0.18 }
+      {
+        "id": "slow",
+        "label": "🐢 Too slow",
+        "lr": 0.01
+      },
+      {
+        "id": "good",
+        "label": "👌 Just right",
+        "lr": 0.1
+      },
+      {
+        "id": "zigzag",
+        "label": "〰️ Zig-zag",
+        "lr": 0.16
+      },
+      {
+        "id": "chaos",
+        "label": "🔥 Chaos mode",
+        "lr": 0.18
+      }
     ]
+  },
+  "curves": {
+    "bowl": {
+      "id": "bowl",
+      "name": "Smooth bowl",
+      "formula": "(w − 2)²",
+      "coeffs": [
+        4,
+        -4,
+        1
+      ],
+      "domain": [
+        -3,
+        7
+      ],
+      "range": [
+        0,
+        26
+      ],
+      "defaultStart": -2,
+      "defaultLr": 0.3,
+      "presets": [
+        {
+          "id": "slow",
+          "label": "🐢 Too slow",
+          "lr": 0.02,
+          "start": -2,
+          "hint": "Baby steps. It will get there… eventually. Maybe go make chai."
+        },
+        {
+          "id": "good",
+          "label": "👌 Just right",
+          "lr": 0.3,
+          "start": -2,
+          "hint": "Big steps while the slope is steep, smaller ones as it flattens out."
+        },
+        {
+          "id": "bouncy",
+          "label": "🏓 Bouncy",
+          "lr": 0.9,
+          "start": -2,
+          "hint": "Overshoots the bottom every time, bouncing side to side, but the bounces shrink."
+        },
+        {
+          "id": "chaos",
+          "label": "🔥 Chaos mode",
+          "lr": 1.05,
+          "start": -2,
+          "hint": "Every hop overshoots by more than the last. Watch the loss chart."
+        }
+      ]
+    },
+    "bumpy": {
+      "id": "bumpy",
+      "name": "Bumpy hills",
+      "formula": "0.06w⁴ − 0.75w² + 0.45w + 4",
+      "coeffs": [
+        4,
+        0.45,
+        -0.75,
+        0,
+        0.06
+      ],
+      "domain": [
+        -4.4,
+        4.4
+      ],
+      "range": [
+        0,
+        13
+      ],
+      "defaultStart": 3.5,
+      "defaultLr": 0.05,
+      "presets": [
+        {
+          "id": "stuck",
+          "label": "🕳️ Stuck in a dip",
+          "lr": 0.05,
+          "start": 3.5,
+          "hint": "It settles happily in the nearest valley… which is not the deepest one."
+        },
+        {
+          "id": "leap",
+          "label": "🦘 Lucky leap",
+          "lr": 0.4,
+          "start": 4,
+          "hint": "A steep start plus a big step hops right over the hill."
+        },
+        {
+          "id": "goodstart",
+          "label": "🎯 Good start",
+          "lr": 0.05,
+          "start": -0.5,
+          "hint": "Same small steps, different starting point: now it finds the deep valley."
+        }
+      ]
+    }
+  },
+  "ballRules": {
+    "$comment": "Must match RULES in site/src/sims/ball/math.ts (checked by the lesson's sims.test.ts).",
+    "maxSteps": 300,
+    "moveTol": 0.0005,
+    "slopeTol": 0.005,
+    "explodeAbs": 1000000.0,
+    "globalTol": 0.05
   }
 }

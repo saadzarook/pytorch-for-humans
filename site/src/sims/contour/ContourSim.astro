@@ -1,0 +1,100 @@
+---
+/**
+ * <ContourSim data={data.delivery} config={data.contour} />: fitting a line with
+ * gradient descent, with the loss landscape seen from above.
+ * Everything lesson-specific comes from the lesson's data.json.
+ */
+import SimShell from '../kit/SimShell.astro';
+import RunControls from '../kit/RunControls.astro';
+import LogPanel from '../kit/LogPanel.astro';
+import type { Dataset } from './math';
+import type { ContourConfig } from './mount';
+
+interface Props {
+  data: Dataset;
+  config: ContourConfig;
+  title?: string;
+}
+const { data, config, title = 'Fit the line, walk the bowl' } = Astro.props;
+const { view } = config;
+const dataLabel = `Scatter plot of ${config.yLabel} versus ${config.xLabel.replace(/ ?→$/, '')} with the current fitted line.`;
+---
+
+<SimShell sim="contour" title={title} options={{ data: { x: data.x, y: data.y }, config }}>
+  <div class="pfh-row" role="group" aria-label="Learning-rate presets" data-part="presets">
+    {
+      config.presets.map((p, i) => (
+        <button type="button" class="pfh-btn" data-preset={i} aria-pressed="false">
+          {p.label}
+        </button>
+      ))
+    }
+  </div>
+  <div class="ct-panels" data-part="panels">
+    <figure>
+      <div><canvas data-part="data" role="img" aria-label={dataLabel}></canvas></div>
+      <figcaption>The data and the current line</figcaption>
+    </figure>
+    <figure>
+      <div>
+        <canvas
+          data-part="map"
+          tabindex="0"
+          role="img"
+          aria-label="Contour map of the loss for every slope w and intercept b. Lighter means lower loss. Gradient descent's path is drawn on top. Click to choose a starting point."
+        ></canvas>
+      </div>
+      <figcaption>Loss landscape from above: lighter = lower loss, × = best line. Tap to pick a start.</figcaption>
+    </figure>
+  </div>
+  <p class="sim-readout" data-part="readout"></p>
+  <p class="ct-plain" data-part="plain"></p>
+  <RunControls>
+    <label class="pfh-field">
+      <span>Learning rate: <output data-part="lr-out" class="pfh-mono"></output></span>
+      <input data-part="lr" type="range" min="0" max="1000" step="1" />
+    </label>
+    <label class="pfh-field">
+      <span>Start slope w₀: <output data-part="w0-out" class="pfh-mono"></output></span>
+      <input data-part="w0" type="range" min={view.w[0]} max={view.w[1]} step="0.1" />
+    </label>
+    <label class="pfh-field">
+      <span>Start intercept b₀: <output data-part="b0-out" class="pfh-mono"></output></span>
+      <input data-part="b0" type="range" min={view.b[0]} max={view.b[1]} step="0.1" />
+    </label>
+  </RunControls>
+  <div class="sim-two">
+    <figure class="ct-chart">
+      <canvas data-part="chart" aria-hidden="true"></canvas>
+      <figcaption>Loss after each step (hover or tap for exact values)</figcaption>
+    </figure>
+    <LogPanel />
+  </div>
+</SimShell>
+
+<style>
+  .ct-panels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1rem;
+  }
+  figure {
+    margin: 0;
+    min-width: 0;
+  }
+  figure > div {
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+  [data-part='map'] {
+    cursor: crosshair;
+  }
+  figcaption {
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+    margin-top: 0.25rem;
+  }
+  .ct-plain {
+    font-size: var(--sl-text-sm);
+  }
+</style>

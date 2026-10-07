@@ -1,0 +1,12 @@
+{
+  "$comment": "Read by math.ts and scripts/simref.py.",
+  "x": 2,
+  "y": 7,
+  "lr": 0.02,
+  "start": {
+    "w": 1,
+    "b": 0.5
+  },
+  "autoMs": 3200,
+  "skipRounds": 10
+}

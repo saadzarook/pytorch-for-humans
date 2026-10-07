@@ -1,0 +1,83 @@
+---
+/**
+ * <BallSim curves={data.curves} curve="bowl" />: gradient descent in 1D, a ball
+ * hopping down a loss curve. Curves and presets come from the lesson's data.json.
+ */
+import SimShell from '../kit/SimShell.astro';
+import RunControls from '../kit/RunControls.astro';
+import LogPanel from '../kit/LogPanel.astro';
+import type { CurveSpec } from './math';
+
+interface Props {
+  curves: Record<string, CurveSpec>;
+  curve?: string;
+  title?: string;
+  /** Allow switching between curves. */
+  switchable?: boolean;
+  /** The bowl's chaos threshold from the lesson's facts.json, quoted by the narrator. */
+  chaosLr?: string;
+}
+const { curves, curve = 'bowl', title = 'Roll the ball downhill', switchable = true, chaosLr } = Astro.props;
+---
+
+<SimShell sim="ball" title={title} options={{ curves, curve, chaosLr }}>
+  <div class="pfh-row" role="group" aria-label="Presets" data-part="presets"></div>
+  <div class="ball-stage" data-part="stage">
+    <canvas
+      data-part="curve"
+      tabindex="0"
+      aria-label="A loss curve with a ball on it, the slope at the ball, and an arrow to the next hop. Numbers are in the readout below."
+    ></canvas>
+  </div>
+  <p class="sim-readout" data-part="readout"></p>
+  <p class="sim-readout ball-eq" data-part="equation"></p>
+  <RunControls>
+    <label class="pfh-field">
+      <span>Learning rate (step size): <output data-part="lr-out" class="pfh-mono"></output></span>
+      <input data-part="lr" type="range" min="0" max="1000" step="1" />
+    </label>
+    <label class="pfh-field">
+      <span>Starting point w₀: <output data-part="start-out" class="pfh-mono"></output></span>
+      <input data-part="start" type="range" step="0.1" />
+    </label>
+    {
+      switchable && (
+        <label class="pfh-field">
+          <span>Loss curve</span>
+          <select data-part="curve-select">
+            {Object.values(curves).map((c) => (
+              <option value={c.id} selected={c.id === curve}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      )
+    }
+  </RunControls>
+  <div class="sim-two">
+    <figure class="ball-chart">
+      <canvas data-part="chart" aria-hidden="true"></canvas>
+      <figcaption>Loss after each step (hover or tap for exact values)</figcaption>
+    </figure>
+    <LogPanel />
+  </div>
+</SimShell>
+
+<style>
+  .ball-stage {
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+  .ball-eq {
+    color: var(--sl-color-gray-2);
+  }
+  .ball-chart {
+    margin: 0;
+  }
+  .ball-chart figcaption {
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+    margin-top: 0.25rem;
+  }
+</style>

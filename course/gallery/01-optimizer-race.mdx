@@ -1,0 +1,20 @@
+---
+title: The optimizer race
+description: SGD, Momentum and Adam race down a curved valley from the same start. Watch the phases, the zig-zags and the blow-ups.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import OptimizerRace from '~/sims/optimizer-race/OptimizerRace.astro';
+import facts from '~/sims/optimizer-race/facts.json';
+
+Three optimizers, same start, same learning rate, three strategies. **SGD** steps straight down the local slope. **Momentum** remembers its previous steps and builds up speed. **Adam** rescales each step by how big the gradients have recently been.
+
+<OptimizerRace />
+
+**What to look for:** at lr {facts.defaultLr} the finishing order is **{facts.orderText}** ({facts.arrival.Momentum}, {facts.arrival.Adam} and {facts.arrival.SGD} steps). Push the learning rate past {facts.sgdDivergesFromText} and SGD is the only one that blows up.
+
+<Aside type="note" title="Which lesson is this from?">
+The **level up: smarter optimizers** section of [Gradient descent](../../foundations/gradient-descent/), right after the zig-zag discussion. The lesson's notebook runs the same race with real `torch.optim` and animates the paths.
+</Aside>
+
+**How we know it's right:** the update rules match `torch.optim.SGD`, `SGD(momentum=0.9)` and `Adam` with default betas, checked one update at a time against real PyTorch for learning rates 0.1, 0.3 and 0.9. The finishing order and the blow-up point above are computed with real `torch.optim` too, and the tests check this sim reproduces them exactly.

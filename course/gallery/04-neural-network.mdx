@@ -1,0 +1,19 @@
+---
+title: Watch a network learn
+description: A real two-hidden-layer network trains live in your browser. Watch its decision boundary bend around the data.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import NeuralNetwork from '~/sims/neural-network/NeuralNetwork.astro';
+
+This is a real neural network, training right here: 2 inputs, two hidden layers, 1 output, trained with backprop and Adam. Each **epoch** it predicts every point, measures the loss, works out every gradient, and nudges every weight. Watch the boundary bend.
+
+<NeuralNetwork />
+
+**Things to try:** switch the data to *spiral*, then drop to 2 neurons and watch it get stuck (it's too simple for the shape: *underfitting*). Push the learning rate up and watch the loss chart get jumpy.
+
+<Aside type="note" title="Which lesson is this from?">
+The upcoming **Your first neural network** lesson (Foundations), where you'll build this exact network as an `nn.Module`.
+</Aside>
+
+**How we know it's right:** it's a 2 → N → N → 1 network with a sigmoid output, binary cross-entropy loss and full-batch Adam, equivalent to `nn.Sequential` + `BCEWithLogitsLoss` + `torch.optim.Adam`. Its predictions, every weight's gradient, and the result of an Adam step all match real PyTorch.

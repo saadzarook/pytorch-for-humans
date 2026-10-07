@@ -15,6 +15,13 @@ sidebar:
   (python scripts/test_snippets.py --update), never pasted; any number the
   prose quotes comes from facts.json (written by an optional facts.py).
   Reference implementation: course/foundations/01-gradient-descent/lesson.mdx
+
+  SIM CHECKLIST (docs/SIM_STANDARD.md) — every sim on this page must:
+  [ ] narrate every phase (what + why)       [ ] never autoplay; Step works; slow by default
+  [ ] show the numbers behind the picture    [ ] label things on the canvas
+  [ ] log key moments with step/epoch        [ ] highlight one thing at a time
+  [ ] keyboard (Space/→/←), reduced motion, 375px, light + dark
+  [ ] maths checked vs PyTorch (golden.py + Vitest); narration numbers from facts.json
 */}
 
 import { Aside, Code } from '@astrojs/starlight/components';
@@ -50,7 +57,7 @@ TODO: the analogy. Then a table mapping analogy → ML terms.
 
 ## 3. 🎮 Poke it. Break it.
 
-TODO: a sim from ~/components/sims (or a new one), with presets that show success *and* failure, plus a "Things to try" list.
+TODO: a sim from ~/sims (or a new one built with ~/sims/kit, see docs/SIM_STANDARD.md), with presets that show success *and* failure, plus a "Things to try" list.
 
 ## 4. 🛠️ Build it from scratch (NumPy)
 

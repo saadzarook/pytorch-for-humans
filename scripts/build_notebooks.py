@@ -7,6 +7,8 @@ Build-time expansions (so the notebook can't drift from the website):
         The site shows and runs the same files, so both always match.
     {{facts.valley.ratio}}
         Replaced from the lesson's generated facts.json (see scripts/test_snippets.py).
+    {{sim:optimizer-race.orderText}}
+        Replaced from a sim's generated facts.json (site/src/sims/<name>/facts.json).
     {{COURSE_URL}}
         Replaced with the COURSE_URL environment variable (the published site's base URL).
 
@@ -48,6 +50,8 @@ USERNAME_PLACEHOLDER = "{KAGGLE_USERNAME}"
 URL_PLACEHOLDER = "{{COURSE_URL}}"
 INCLUDE_RE = re.compile(r"^#\s*include:\s*(\S+)\s*$")
 FACT_RE = re.compile(r"\{\{facts\.([\w.]+)\}\}")
+SIM_FACT_RE = re.compile(r"\{\{sim:([\w-]+)\.([\w.]+)\}\}")
+SIMS = ROOT / "site" / "src" / "sims"
 
 
 class BuildError(Exception):
@@ -92,21 +96,30 @@ def compare_with_site_outputs(nb: nbformat.NotebookNode, lesson: Path) -> list[s
     return problems
 
 
+def _lookup(facts: dict, dotted: str, placeholder: str) -> str:
+    value: object = facts
+    for key in dotted.split("."):
+        if not isinstance(value, dict) or key not in value:
+            raise BuildError(f"unknown fact {placeholder} (is the facts.json up to date?)")
+        value = value[key]
+    return str(value)
+
+
 def fill_facts(nb: nbformat.NotebookNode, lesson: Path) -> None:
+    """{{facts.a.b}} from the lesson's facts.json; {{sim:name.a.b}} from site/src/sims/<name>/facts.json."""
     facts_path = lesson / "facts.json"
     facts = json.loads(facts_path.read_text(encoding="utf-8")) if facts_path.exists() else {}
 
-    def lookup(m: re.Match) -> str:
-        value: object = facts
-        for key in m.group(1).split("."):
-            if not isinstance(value, dict) or key not in value:
-                raise BuildError(f"unknown fact {{{{facts.{m.group(1)}}}}} (is facts.json up to date?)")
-            value = value[key]
-        return str(value)
+    def sim_lookup(m: re.Match) -> str:
+        path = SIMS / m.group(1) / "facts.json"
+        if not path.exists():
+            raise BuildError(f"no facts.json for sim '{m.group(1)}'")
+        return _lookup(json.loads(path.read_text(encoding="utf-8")), m.group(2), m.group(0))
 
     for cell in nb.cells:
         if cell.cell_type == "markdown":
-            cell.source = FACT_RE.sub(lookup, cell.source)
+            cell.source = FACT_RE.sub(lambda m: _lookup(facts, m.group(1), m.group(0)), cell.source)
+            cell.source = SIM_FACT_RE.sub(sim_lookup, cell.source)
 
 
 def fill_course_url(nb: nbformat.NotebookNode, course_url: str | None) -> None:

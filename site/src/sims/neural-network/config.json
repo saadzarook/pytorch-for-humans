@@ -1,0 +1,26 @@
+{
+  "$comment": "Read by math.ts and scripts/simref.py.",
+  "nPoints": 200,
+  "dataSeed": 42,
+  "initSeed": 7,
+  "hiddenOptions": [
+    2,
+    4,
+    8,
+    16
+  ],
+  "defaultHidden": 8,
+  "lrRange": [
+    0.001,
+    0.31622776601683794
+  ],
+  "sliderSteps": 100,
+  "defaultSliderPos": 62,
+  "domain": 1.2,
+  "grid": 50,
+  "rates": {
+    "slow": 6,
+    "normal": 25,
+    "fast": 120
+  }
+}

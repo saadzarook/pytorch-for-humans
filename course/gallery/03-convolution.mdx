@@ -1,0 +1,18 @@
+---
+title: Convolution, one window at a time
+description: A 3×3 kernel slides over a picture of the letter A. Place, multiply, add up, one window at a time.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Convolution from '~/sims/convolution/Convolution.astro';
+import facts from '~/sims/convolution/facts.json';
+
+A convolution kernel is a tiny pattern detector. It slides across an image, and at every stop it multiplies the pixels under it by its weights and adds them up. That one number becomes one pixel of the output. Here you can watch every stop.
+
+<Convolution />
+
+<Aside type="note" title="Which lesson is this from?">
+The upcoming **CNNs** lesson (Intermediate). In a real CNN, the network *learns* dozens of kernels like these instead of having them hand-picked.
+</Aside>
+
+**How we know it's right:** like `F.conv2d`, the kernel is not flipped (technically this is cross-correlation), with stride 1 and no padding, so the output is {facts.imageSize} − 3 + 1 = {facts.outSize} pixels across. Every preset kernel's output matches `F.conv2d` exactly, and the claims in the narration (for example "the middle of the crossbar stays 0" for vertical edges) are checked against it too.

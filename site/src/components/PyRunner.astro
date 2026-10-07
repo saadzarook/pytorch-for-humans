@@ -154,8 +154,8 @@ const uid = `py-${Math.random().toString(36).slice(2, 9)}`;
 
 <script>
   import * as py from './pyodide/client';
-  import { LossChart } from './sims/lib/lossChart';
-  import { onThemeChange } from './sims/lib/theme';
+  import { LossChart } from '../sims/kit/lossChart';
+  import { onThemeChange } from '../sims/kit/theme';
 
   class PyRunner extends HTMLElement {
     private editor!: HTMLTextAreaElement;

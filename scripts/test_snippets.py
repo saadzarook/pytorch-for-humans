@@ -12,6 +12,15 @@ Snippet layout (per lesson):
                             and checks the lesson's claims; facts.json is its
                             GENERATED output, imported by the lesson and notebook.
 
+Sims (site/src/sims/<sim>/, see docs/SIM_STANDARD.md):
+
+    golden.py / golden.json Reference values from real PyTorch; Vitest checks the
+                            sim's TypeScript maths matches them.
+    facts.py / facts.json   The numbers and claims the sim's narration relies on.
+
+Every *.json above is GENERATED from its script and committed; this runner fails
+if any is stale. Sims run first, because lesson facts may cross-check them.
+
 Challenge convention (browser/):
 
     challenge_starter.py    What the reader starts with. Must run without errors
@@ -23,7 +32,7 @@ Challenge convention (browser/):
 Usage:
     python scripts/test_snippets.py            # run all; fail if any generated file is stale
     python scripts/test_snippets.py --update   # run all and rewrite the generated files
-    python scripts/test_snippets.py --no-torch # skip snippets/pytorch (and their outputs)
+    python scripts/test_snippets.py --no-torch # skip anything needing PyTorch (pytorch snippets, sims)
 """
 
 from __future__ import annotations
@@ -38,6 +47,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 COURSE = ROOT / "course"
+SIMS = ROOT / "site" / "src" / "sims"
 TIMEOUT_S = 180
 
 # Modules a browser snippet may import. Pyodide ships the full standard library,
@@ -57,6 +67,19 @@ def run_code(code: str, cwd: Path) -> tuple[int, str, str]:
         )
     except subprocess.TimeoutExpired:
         return 1, "", f"timed out after {TIMEOUT_S}s"
+    return proc.returncode, normalise(proc.stdout), proc.stderr
+
+
+def run_script(path: Path) -> tuple[int, str, str]:
+    """Run a generator script (facts.py / golden.py) by path, from its own folder."""
+    env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(path)], capture_output=True, text=True,
+            encoding="utf-8", cwd=path.parent, env=env, timeout=TIMEOUT_S * 3,
+        )
+    except subprocess.TimeoutExpired:
+        return 1, "", f"timed out after {TIMEOUT_S * 3}s"
     return proc.returncode, normalise(proc.stdout), proc.stderr
 
 
@@ -144,18 +167,29 @@ def main() -> int:
     args = parser.parse_args()
     runner = Runner(update=args.update)
 
+    def generated(script: Path) -> None:
+        rc, out, err = run_script(script)
+        label = script.relative_to(ROOT).as_posix()
+        if rc != 0:
+            runner.result(False, label, f"{out}{err}")
+        else:
+            runner.golden(out, script.with_suffix(".json"), label)
+
+    # Sims first: lesson facts may cross-check a sim's facts.json.
+    if args.no_torch:
+        print("\n[sims] skipped (--no-torch)")
+    else:
+        for sim in sorted(p for p in SIMS.iterdir() if p.is_dir()):
+            scripts = [sim / n for n in ("golden.py", "facts.py") if (sim / n).exists()]
+            if scripts:
+                print(f"\n[{sim.relative_to(ROOT).as_posix()}]")
+                for script in scripts:
+                    generated(script)
+
     lessons = sorted({p.parent.parent for p in COURSE.glob("**/snippets/browser")}
                      | {p.parent for p in COURSE.glob("**/facts.py")})
     for lesson in lessons:
         print(f"\n[{lesson.relative_to(ROOT).as_posix()}]")
-
-        facts_py = lesson / "facts.py"
-        if facts_py.exists():
-            rc, out, err = run_code(facts_py.read_text(encoding="utf-8"), lesson)
-            if rc != 0:
-                runner.result(False, "facts.py", f"{out}{err}")
-            else:
-                runner.golden(out, lesson / "facts.json", "facts.py")
 
         browser_dir = lesson / "snippets" / "browser"
         check_file = browser_dir / "challenge_check.py"
@@ -171,6 +205,10 @@ def main() -> int:
         if not args.no_torch:
             for path in sorted((lesson / "snippets" / "pytorch").glob("*.py")):
                 runner.snippet(path, lesson, None)
+
+        # Last: lesson facts may cross-check snippet outputs.
+        if (lesson / "facts.py").exists():
+            generated(lesson / "facts.py")
 
     print(f"\n{runner.passed} passed, {len(runner.failures)} failed")
     if runner.updated:

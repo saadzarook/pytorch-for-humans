@@ -1,0 +1,24 @@
+---
+title: Sim gallery
+description: Every interactive simulation in the course, each on its own page, with the lesson it belongs to.
+sidebar:
+  label: Overview
+---
+
+Every sim in the course lives here too, on its own page, so you can come back and play with it without scrolling through a lesson.
+
+They all work the same way:
+
+- A **narrator** at the top says what's happening right now and why it matters.
+- Nothing plays on its own. **Step** through it, or press **Play** and pick a speed. Staged sims have **Back** / **Next**.
+- The **numbers** behind the picture are always on show, and a **log** keeps the key moments.
+- Click a sim, then use the keyboard: <kbd>Space</kbd> play/pause, <kbd>→</kbd> step, <kbd>←</kbd> back.
+
+| Sim | What it shows | Lesson |
+| --- | --- | --- |
+| [The optimizer race](optimizer-race/) | SGD vs Momentum vs Adam on a curved valley | [Gradient descent](../foundations/gradient-descent/) (level up section) |
+| [Backprop as a chain of blame](backprop/) | How `loss.backward()` fills in `.grad`, one node at a time | Autograd (coming soon) |
+| [Convolution, one window at a time](convolution/) | A 3×3 kernel sliding over an image | CNNs (coming soon) |
+| [Watch a network learn](neural-network/) | A small network bending its decision boundary, live | Your first neural network (coming soon) |
+
+**Why trust the maths?** Each sim re-implements its maths in JavaScript, so the course checks it against real PyTorch on every change: optimizer steps against `torch.optim`, gradients against autograd, convolutions against `F.conv2d`, and the network against `nn.Sequential` + `BCEWithLogitsLoss`. Any number a sim's narration quotes is computed the same way.

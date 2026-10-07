@@ -1,0 +1,32 @@
+{
+  "arrival": {
+    "Adam": 119,
+    "Momentum": 46,
+    "SGD": 280
+  },
+  "defaultLr": "0.1",
+  "order": [
+    "Momentum",
+    "Adam",
+    "SGD"
+  ],
+  "orderText": "Momentum, then Adam, then SGD",
+  "sgdDivergesFromLr": 0.831764,
+  "sgdDivergesFromPos": 96,
+  "sgdDivergesFromText": "0.83",
+  "top": {
+    "Adam": {
+      "arrived": 41,
+      "diverged": null
+    },
+    "Momentum": {
+      "arrived": 31,
+      "diverged": null
+    },
+    "SGD": {
+      "arrived": null,
+      "diverged": 9
+    }
+  },
+  "topLr": "1"
+}

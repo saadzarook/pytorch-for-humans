@@ -32,6 +32,21 @@ function tierItems(tier) {
   return lessons.map((name) => ({ slug: `${tier}/${name.replace(/^\d+-/, '')}` }));
 }
 
+/**
+ * The sim gallery: course/gallery/NN-name.mdx, in NN order, after the overview.
+ */
+function galleryItems() {
+  const dir = courseDir + 'gallery';
+  const pages = fs.existsSync(dir)
+    ? fs
+        .readdirSync(dir)
+        .filter((f) => /^\d+-.*\.mdx?$/.test(f))
+        .sort()
+        .map((f) => ({ slug: `gallery/${f.replace(/^\d+-/, '').replace(/\.mdx?$/, '')}` }))
+    : [];
+  return [{ label: 'Overview', slug: 'gallery' }, ...pages];
+}
+
 export default defineConfig({
   site,
   base,
@@ -51,6 +66,7 @@ export default defineConfig({
         { label: 'Foundations', items: tierItems('foundations') },
         { label: 'Intermediate', collapsed: true, items: tierItems('intermediate') },
         { label: 'Advanced', collapsed: true, items: tierItems('advanced') },
+        { label: 'Sim gallery', collapsed: true, items: galleryItems() },
         { label: 'How lessons work', slug: 'about/lesson-template' },
       ],
     }),

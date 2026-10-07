@@ -1,0 +1,145 @@
+---
+/**
+ * <Backprop />: backprop as a chain of blame, one narrated step at a time.
+ * Ported from reference/ml-sim-lab.html; numbers checked against torch autograd.
+ */
+import SimShell from '../kit/SimShell.astro';
+import StepControls from '../kit/StepControls.astro';
+import cfg from './config.json';
+
+interface Props {
+  title?: string;
+}
+const { title = 'Backprop as a chain of blame' } = Astro.props;
+---
+
+<SimShell sim="backprop" title={title} keys={{ toggle: 'auto-play', next: 'next', back: 'back' }}>
+  <p slot="intro" class="sim-intro">
+    A one-neuron model learns to output <b>{cfg.y}</b> when it sees <b>{cfg.x}</b>. Press <b>Next</b> to
+    walk through one full training round: the forward pass, then the backward pass, then the update.
+    Every step shows the actual arithmetic.
+  </p>
+  <div class="bp-scroll">
+    <svg
+      class="bp-graph"
+      data-part="graph"
+      viewBox="0 0 760 390"
+      tabindex="0"
+      role="img"
+      aria-label="Computation graph: x and w feed a multiply node, then plus b, minus y, then squared to produce the loss L"
+    ></svg>
+  </div>
+  <StepControls>
+    <span class="bp-spacer"></span>
+    <button type="button" class="pfh-btn" data-part="skip">Skip {cfg.skipRounds} rounds</button>
+    <button type="button" class="pfh-btn" data-part="reset">↺ Reset</button>
+  </StepControls>
+  <div class="bp-code" data-part="code" aria-label="Equivalent PyTorch code">
+    <div>loss = (w * x + b - y) ** 2           <span class="c"># forward: compute + record the graph</span></div>
+    <div>loss.backward()                       <span class="c"># backward: fills w.grad and b.grad</span></div>
+    <div>with torch.no_grad():</div>
+    <div>    w -= lr * w.grad; b -= lr * b.grad   <span class="c"># update, lr = {cfg.lr}</span></div>
+    <div>w.grad.zero_(); b.grad.zero_()        <span class="c"># reset, or the next round's grads pile on top</span></div>
+  </div>
+  <div class="sim-readout" data-part="readout"></div>
+</SimShell>
+
+<style>
+  .bp-scroll {
+    overflow-x: auto;
+  }
+  .bp-graph {
+    display: block;
+    min-width: 620px;
+    width: 100%;
+  }
+  .bp-graph:focus-visible {
+    outline: 2px solid var(--sl-color-accent);
+    outline-offset: 2px;
+  }
+  .bp-graph :global(.edge) {
+    stroke: var(--card-border);
+    stroke-width: 2.5;
+    fill: none;
+    transition: stroke 0.3s;
+  }
+  .bp-graph :global(.edge.fwd) {
+    stroke: var(--sim-amber);
+    stroke-width: 3.5;
+  }
+  .bp-graph :global(.edge.bwd) {
+    stroke: var(--sim-plum);
+    stroke-width: 3.5;
+    stroke-dasharray: 7 5;
+  }
+  .bp-graph :global(.shape) {
+    fill: var(--sim-surface);
+    stroke: var(--sim-text);
+    stroke-width: 1.8;
+    transition: stroke 0.3s, stroke-width 0.3s;
+  }
+  /* One thing at a time: the active node is highlighted, the rest stay muted. */
+  .bp-graph :global(.focus .shape) {
+    stroke: var(--sim-amber);
+    stroke-width: 4.5;
+  }
+  .bp-graph :global(.lbl) {
+    fill: var(--sim-text);
+    font-family: var(--pfh-font);
+    font-weight: 700;
+    font-size: 20px;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+  .bp-graph :global(.val) {
+    fill: var(--sim-amber);
+    font-family: var(--pfh-font-mono);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .bp-graph :global(.grd) {
+    fill: var(--sim-plum);
+    font-family: var(--pfh-font-mono);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .bp-graph :global(.grd.nograd) {
+    fill: var(--sim-text-muted);
+  }
+  .bp-graph :global(.dir) {
+    fill: var(--sim-text-muted);
+    font-family: var(--pfh-font-mono);
+    font-size: 12px;
+  }
+  .bp-spacer {
+    flex: 1;
+  }
+  .bp-code {
+    background: var(--sim-sunk);
+    border-radius: 0.5rem;
+    padding: 0.6rem 0;
+    font-family: var(--pfh-font-mono);
+    font-size: 0.8rem;
+    overflow-x: auto;
+  }
+  .bp-code div {
+    margin: 0;
+    padding: 1px 1rem;
+    white-space: pre;
+    border-left: 3px solid transparent;
+    transition: background 0.2s;
+  }
+  .bp-code :global(div.hl) {
+    background: var(--sim-surface);
+    border-left-color: var(--sim-amber);
+  }
+  .bp-code .c {
+    color: var(--sl-color-gray-3);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bp-graph :global(*),
+    .bp-code div {
+      transition: none;
+    }
+  }
+</style>
