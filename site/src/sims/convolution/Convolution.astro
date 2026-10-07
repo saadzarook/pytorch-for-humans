@@ -23,7 +23,7 @@ const o = facts.outSize;
   </p>
   <div class="cv-grid">
     <div>
-      <div class="cv-box"><canvas data-part="input" aria-label="Input image grid with the sliding kernel window"></canvas></div>
+      <div class="cv-box"><canvas data-part="input" role="img" aria-label="Input image grid with the sliding kernel window"></canvas></div>
       <div class="cv-cap">input {n}×{n} (1 = ink, 0 = blank)</div>
     </div>
     <div class="cv-kcol">
@@ -47,6 +47,7 @@ const o = facts.outSize;
         <canvas
           data-part="output"
           tabindex="0"
+          role="img"
           aria-label="Output feature map. Amber is positive, teal is negative. Click a pixel to inspect it."
         ></canvas>
       </div>

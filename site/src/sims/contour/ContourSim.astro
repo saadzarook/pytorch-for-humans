@@ -51,15 +51,15 @@ const dataLabel = `Scatter plot of ${config.yLabel} versus ${config.xLabel.repla
   <p class="ct-plain" data-part="plain"></p>
   <RunControls>
     <label class="pfh-field">
-      <span>Learning rate: <output data-part="lr-out" class="pfh-mono"></output></span>
+      <span>Learning rate: <span data-part="lr-out" class="pfh-mono"></span></span>
       <input data-part="lr" type="range" min="0" max="1000" step="1" />
     </label>
     <label class="pfh-field">
-      <span>Start slope w₀: <output data-part="w0-out" class="pfh-mono"></output></span>
+      <span>Start slope w₀: <span data-part="w0-out" class="pfh-mono"></span></span>
       <input data-part="w0" type="range" min={view.w[0]} max={view.w[1]} step="0.1" />
     </label>
     <label class="pfh-field">
-      <span>Start intercept b₀: <output data-part="b0-out" class="pfh-mono"></output></span>
+      <span>Start intercept b₀: <span data-part="b0-out" class="pfh-mono"></span></span>
       <input data-part="b0" type="range" min={view.b[0]} max={view.b[1]} step="0.1" />
     </label>
   </RunControls>

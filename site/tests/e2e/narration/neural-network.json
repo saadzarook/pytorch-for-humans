@@ -1,0 +1,18 @@
+{
+  "epochs 0-12": [
+    "Epoch 0 · untrainedRandom weights, random guessesThe network starts with random weights, so the boundary line is just wherever chance put it. 96 of 200 points are on the wrong side (ringed in red). Press 1 epoch to see a single learning step, or Play.",
+    "Epoch 1 · first stepsThe biggest changes happen firstNearly everything is wrong at the start, so the gradients are large and every weight gets a big nudge. Each epoch: predict all 200 points, measure the loss, backprop, then nudge every weight.",
+    "Epoch 2 · first stepsThe biggest changes happen firstNearly everything is wrong at the start, so the gradients are large and every weight gets a big nudge. Each epoch: predict all 200 points, measure the loss, backprop, then nudge every weight.",
+    "Epoch 3 · first stepsThe biggest changes happen firstNearly everything is wrong at the start, so the gradients are large and every weight gets a big nudge. Each epoch: predict all 200 points, measure the loss, backprop, then nudge every weight.",
+    "Epoch 4 · first stepsThe biggest changes happen firstNearly everything is wrong at the start, so the gradients are large and every weight gets a big nudge. Each epoch: predict all 200 points, measure the loss, backprop, then nudge every weight.",
+    "Epoch 5 · first stepsThe biggest changes happen firstNearly everything is wrong at the start, so the gradients are large and every weight gets a big nudge. Each epoch: predict all 200 points, measure the loss, backprop, then nudge every weight.",
+    "Epoch 6 · first stepsThe biggest changes happen firstNearly everything is wrong at the start, so the gradients are large and every weight gets a big nudge. Each epoch: predict all 200 points, measure the loss, backprop, then nudge every weight.",
+    "Epoch 7 · first stepsThe biggest changes happen firstNearly everything is wrong at the start, so the gradients are large and every weight gets a big nudge. Each epoch: predict all 200 points, measure the loss, backprop, then nudge every weight.",
+    "Epoch 8 · first stepsThe biggest changes happen firstNearly everything is wrong at the start, so the gradients are large and every weight gets a big nudge. Each epoch: predict all 200 points, measure the loss, backprop, then nudge every weight.",
+    "Epoch 9 · first stepsThe biggest changes happen firstNearly everything is wrong at the start, so the gradients are large and every weight gets a big nudge. Each epoch: predict all 200 points, measure the loss, backprop, then nudge every weight.",
+    "Epoch 10 · first stepsThe biggest changes happen firstNearly everything is wrong at the start, so the gradients are large and every weight gets a big nudge. Each epoch: predict all 200 points, measure the loss, backprop, then nudge every weight.",
+    "Epoch 11 · learningLearning: the loss is fallingLoss went from 0.675 to 0.509 over the last 11 epochs. 43 points still on the wrong side. Watch the boundary bend around the red-ringed ones.",
+    "Epoch 12 · learningLearning: the loss is fallingLoss went from 0.675 to 0.484 over the last 12 epochs. 39 points still on the wrong side. Watch the boundary bend around the red-ringed ones.",
+    "log: epoch 7Accuracy passed 75%. 49 points still wrong.epoch 1First weight update. The boundary moved for the first time."
+  ]
+}

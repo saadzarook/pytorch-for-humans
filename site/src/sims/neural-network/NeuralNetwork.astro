@@ -26,6 +26,7 @@ const { title = 'Watch a network learn' } = Astro.props;
       <canvas
         data-part="map"
         tabindex="0"
+        role="img"
         aria-label="Two classes of points (amber and teal) with the network's decision regions and boundary line. Misclassified points are ringed in red."
       ></canvas>
     </div>
@@ -61,7 +62,7 @@ const { title = 'Watch a network learn' } = Astro.props;
       </select>
     </label>
     <label class="pfh-field">
-      <span>Learning rate: <output data-part="lr-out" class="pfh-mono"></output></span>
+      <span>Learning rate: <span data-part="lr-out" class="pfh-mono"></span></span>
       <input data-part="lr" type="range" min="0" max="100" step="1" />
     </label>
   </RunControls>

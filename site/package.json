@@ -11,7 +11,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@astrojs/starlight": "0.42.5",
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
+    "@playwright/test": "1.63.0",
     "typescript": "6.0.3",
     "vitest": "5.0.3"
   }

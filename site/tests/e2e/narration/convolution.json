@@ -1,0 +1,50 @@
+{
+  "vertical edges": [
+    "ReadyA kernel is a tiny 3×3 pattern detectorIt slides across the image one pixel at a time. At every stop it multiplies the 9 pixels under it by its 9 weights and adds them up, and that sum becomes one output pixel. Looks for vertical edges: the left column is negative and the right is positive, so it fires when ink sits on the right side of the window and not the left. Press Step to go one beat at a time.",
+    "Window 1 of 100 · beat 1: placePlace the windowThe kernel sits over input rows 1–3, columns 1–3. It covers 0 inked pixels (shown as 1s in the patch grid below).",
+    "Window 1 of 100 · beat 2: multiplyMultiply pixel by weightEach of the 9 pixels is multiplied by the weight sitting on top of it. Blank pixels are 0, so only the 0 inked ones can contribute.",
+    "Window 1 of 100 · beat 3: add upAdd the products0 = 0. That becomes output pixel (row 1, col 1). The patch is empty (all 0s), so every product is 0. Nothing to see here.",
+    "Window 3 of 100 · beat 3: add upAdd the products1 = 1. That becomes output pixel (row 1, col 3). Positive (1): this patch looks like what the kernel is searching for, so the output pixel turns amber.",
+    "Done · 100 windowsThe feature map is completeA 3×3 window fits in 12 − 3 + 1 = 10 positions across and 10 down, giving a 10×10 output. The slanted sides lit up, amber on one side of each stroke and teal on the other, while the middle of the crossbar stayed 0: this kernel ignores horizontal lines. A CNN learns dozens of kernels like this instead of having them hand-picked. Click any output pixel to inspect it."
+  ],
+  "horizontal edges": [
+    "ReadyA kernel is a tiny 3×3 pattern detectorIt slides across the image one pixel at a time. At every stop it multiplies the 9 pixels under it by its 9 weights and adds them up, and that sum becomes one output pixel. Looks for horizontal edges: the top row is negative and the bottom is positive, so it fires when ink sits below and not above. Press Step to go one beat at a time.",
+    "Window 1 of 100 · beat 1: placePlace the windowThe kernel sits over input rows 1–3, columns 1–3. It covers 0 inked pixels (shown as 1s in the patch grid below).",
+    "Window 1 of 100 · beat 2: multiplyMultiply pixel by weightEach of the 9 pixels is multiplied by the weight sitting on top of it. Blank pixels are 0, so only the 0 inked ones can contribute.",
+    "Window 1 of 100 · beat 3: add upAdd the products0 = 0. That becomes output pixel (row 1, col 1). The patch is empty (all 0s), so every product is 0. Nothing to see here.",
+    "Window 3 of 100 · beat 3: add upAdd the products1 = 1. That becomes output pixel (row 1, col 3). Positive (1): this patch looks like what the kernel is searching for, so the output pixel turns amber.",
+    "Done · 100 windowsThe feature map is completeA 3×3 window fits in 12 − 3 + 1 = 10 positions across and 10 down, giving a 10×10 output. The crossbar lit up strongly, amber along its top edge and teal along its bottom edge, while the slanted sides respond only weakly. A CNN learns dozens of kernels like this instead of having them hand-picked. Click any output pixel to inspect it."
+  ],
+  "outline": [
+    "ReadyA kernel is a tiny 3×3 pattern detectorIt slides across the image one pixel at a time. At every stop it multiplies the 9 pixels under it by its 9 weights and adds them up, and that sum becomes one output pixel. Fires when the centre differs from its 8 neighbours. In a flat area (all ink or all blank) the weights cancel out to 0. Press Step to go one beat at a time.",
+    "Window 1 of 100 · beat 1: placePlace the windowThe kernel sits over input rows 1–3, columns 1–3. It covers 0 inked pixels (shown as 1s in the patch grid below).",
+    "Window 1 of 100 · beat 2: multiplyMultiply pixel by weightEach of the 9 pixels is multiplied by the weight sitting on top of it. Blank pixels are 0, so only the 0 inked ones can contribute.",
+    "Window 1 of 100 · beat 3: add upAdd the products0 = 0. That becomes output pixel (row 1, col 1). The patch is empty (all 0s), so every product is 0. Nothing to see here.",
+    "Window 3 of 100 · beat 3: add upAdd the products-1 = -1. That becomes output pixel (row 1, col 3). Negative (-1): the opposite pattern, so the output pixel turns teal.",
+    "Done · 100 windowsThe feature map is completeA 3×3 window fits in 12 − 3 + 1 = 10 positions across and 10 down, giving a 10×10 output. Amber means a strong positive response and teal a strong negative one. A CNN learns dozens of kernels like this instead of having them hand-picked. Click any output pixel to inspect it."
+  ],
+  "blur": [
+    "ReadyA kernel is a tiny 3×3 pattern detectorIt slides across the image one pixel at a time. At every stop it multiplies the 9 pixels under it by its 9 weights and adds them up, and that sum becomes one output pixel. Averages the 9 pixels: each one counts 1/9. Everything gets softer. Press Step to go one beat at a time.",
+    "Window 1 of 100 · beat 1: placePlace the windowThe kernel sits over input rows 1–3, columns 1–3. It covers 0 inked pixels (shown as 1s in the patch grid below).",
+    "Window 1 of 100 · beat 2: multiplyMultiply pixel by weightEach of the 9 pixels is multiplied by the weight sitting on top of it. Blank pixels are 0, so only the 0 inked ones can contribute.",
+    "Window 1 of 100 · beat 3: add upAdd the products0 = 0. That becomes output pixel (row 1, col 1). The patch is empty (all 0s), so every product is 0. Nothing to see here.",
+    "Window 3 of 100 · beat 3: add upAdd the products0.11 = 0.11. That becomes output pixel (row 1, col 3). Positive (0.11): this patch looks like what the kernel is searching for, so the output pixel turns amber.",
+    "Done · 100 windowsThe feature map is completeA 3×3 window fits in 12 − 3 + 1 = 10 positions across and 10 down, giving a 10×10 output. Amber means a strong positive response and teal a strong negative one. A CNN learns dozens of kernels like this instead of having them hand-picked. Click any output pixel to inspect it."
+  ],
+  "sharpen": [
+    "ReadyA kernel is a tiny 3×3 pattern detectorIt slides across the image one pixel at a time. At every stop it multiplies the 9 pixels under it by its 9 weights and adds them up, and that sum becomes one output pixel. Boosts the centre ×5 and subtracts its 4 neighbours, which exaggerates differences. Press Step to go one beat at a time.",
+    "Window 1 of 100 · beat 1: placePlace the windowThe kernel sits over input rows 1–3, columns 1–3. It covers 0 inked pixels (shown as 1s in the patch grid below).",
+    "Window 1 of 100 · beat 2: multiplyMultiply pixel by weightEach of the 9 pixels is multiplied by the weight sitting on top of it. Blank pixels are 0, so only the 0 inked ones can contribute.",
+    "Window 1 of 100 · beat 3: add upAdd the products0 = 0. That becomes output pixel (row 1, col 1). The patch is empty (all 0s), so every product is 0. Nothing to see here.",
+    "Window 4 of 100 · beat 3: add upAdd the products-1 − 1 = -2. That becomes output pixel (row 1, col 4). Negative (-2): the opposite pattern, so the output pixel turns teal.",
+    "Done · 100 windowsThe feature map is completeA 3×3 window fits in 12 − 3 + 1 = 10 positions across and 10 down, giving a 10×10 output. Amber means a strong positive response and teal a strong negative one. A CNN learns dozens of kernels like this instead of having them hand-picked. Click any output pixel to inspect it."
+  ],
+  "identity": [
+    "ReadyA kernel is a tiny 3×3 pattern detectorIt slides across the image one pixel at a time. At every stop it multiplies the 9 pixels under it by its 9 weights and adds them up, and that sum becomes one output pixel. Copies just the centre pixel, so the output is the input with its border trimmed off. Press Step to go one beat at a time.",
+    "Window 1 of 100 · beat 1: placePlace the windowThe kernel sits over input rows 1–3, columns 1–3. It covers 0 inked pixels (shown as 1s in the patch grid below).",
+    "Window 1 of 100 · beat 2: multiplyMultiply pixel by weightEach of the 9 pixels is multiplied by the weight sitting on top of it. Blank pixels are 0, so only the 0 inked ones can contribute.",
+    "Window 1 of 100 · beat 3: add upAdd the products0 = 0. That becomes output pixel (row 1, col 1). The patch is empty (all 0s), so every product is 0. Nothing to see here.",
+    "Window 5 of 100 · beat 3: add upAdd the products1 = 1. That becomes output pixel (row 1, col 5). Positive (1): this patch looks like what the kernel is searching for, so the output pixel turns amber.",
+    "Done · 100 windowsThe feature map is completeA 3×3 window fits in 12 − 3 + 1 = 10 positions across and 10 down, giving a 10×10 output. Amber means a strong positive response and teal a strong negative one. A CNN learns dozens of kernels like this instead of having them hand-picked. Click any output pixel to inspect it."
+  ]
+}

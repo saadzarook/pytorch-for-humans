@@ -26,6 +26,7 @@ const { curves, curve = 'bowl', title = 'Roll the ball downhill', switchable = t
     <canvas
       data-part="curve"
       tabindex="0"
+      role="img"
       aria-label="A loss curve with a ball on it, the slope at the ball, and an arrow to the next hop. Numbers are in the readout below."
     ></canvas>
   </div>
@@ -33,11 +34,11 @@ const { curves, curve = 'bowl', title = 'Roll the ball downhill', switchable = t
   <p class="sim-readout ball-eq" data-part="equation"></p>
   <RunControls>
     <label class="pfh-field">
-      <span>Learning rate (step size): <output data-part="lr-out" class="pfh-mono"></output></span>
+      <span>Learning rate (step size): <span data-part="lr-out" class="pfh-mono"></span></span>
       <input data-part="lr" type="range" min="0" max="1000" step="1" />
     </label>
     <label class="pfh-field">
-      <span>Starting point w₀: <output data-part="start-out" class="pfh-mono"></output></span>
+      <span>Starting point w₀: <span data-part="start-out" class="pfh-mono"></span></span>
       <input data-part="start" type="range" step="0.1" />
     </label>
     {

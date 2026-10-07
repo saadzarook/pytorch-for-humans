@@ -26,6 +26,7 @@ const { title = 'The optimizer race' } = Astro.props;
         <canvas
           data-part="map"
           tabindex="0"
+          role="img"
           aria-label="Contour map of a curved valley loss landscape with three optimizer paths. Lighter is lower loss. Click to choose a start point."
         ></canvas>
       </div>
@@ -41,7 +42,7 @@ const { title = 'The optimizer race' } = Astro.props;
   </div>
   <RunControls>
     <label class="pfh-field">
-      <span>Learning rate: <output data-part="lr-out" class="pfh-mono"></output></span>
+      <span>Learning rate: <span data-part="lr-out" class="pfh-mono"></span></span>
       <input data-part="lr" type="range" min="0" max="100" step="1" />
     </label>
   </RunControls>

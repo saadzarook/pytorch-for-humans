@@ -1,0 +1,17 @@
+{
+  "round 1, round 2 setup, skip": [
+    "Round 1 · setupMeet the modelWe want w·x + b to output 7 when x = 2. Right now w = 1.00 and b = 0.50. x and y are data and never change. w and b are the knobs training is allowed to turn (they have requires_grad=True).",
+    "Forward 1 of 4MultiplyThe first node multiplies its two inputs: z = w × x = 1.00 × 2 = 2.00. Values flow left to right (amber).",
+    "Forward 2 of 4Add the biasp = z + b = 2.00 + 0.50 = 2.50. This is the model's prediction. The right answer is 7.",
+    "Forward 3 of 4How wrong are we?e = p − y = 2.50 − 7 = -4.50. Negative means the prediction is too low.",
+    "Forward 4 of 4Turn the error into a lossL = e² = (-4.50)² = 20.25. Squaring makes the error positive and punishes big misses much more than small ones. Training has one job: make this number small.",
+    "Backward 1 of 5Start at the endNow we go right to left (plum, dashed). Each node answers one question: \"if my value wiggled up by a tiny bit, how much would L change?\" That is its gradient. L's answer about itself is simply 1.",
+    "Backward 2 of 5Square ruleFor L = e², the slope is 2e. So ∂L/∂e = 2 × -4.50 = -9.00. Negative means that increasing e would decrease the loss. Makes sense, since e is too low.",
+    "Backward 3 of 5Subtraction passes it straight throughe = p − y, so raising p by 1 raises e by exactly 1. The gradient passes through unchanged: ∂L/∂p = -9.00.",
+    "Backward 4 of 5Addition copies it to both inputsp = z + b, and both inputs count equally, so both receive the same gradient: ∂L/∂z = ∂L/∂b = -9.00. That's b.grad done.",
+    "Backward 5 of 5Multiplication uses the other inputz = w × x, so raising w by 1 raises z by x (that is, 2). Chain rule: ∂L/∂w = ∂L/∂z × x = -9.00 × 2 = -18.00. That's w.grad. x and y are data, so they get no gradient.",
+    "Round 1 · updateNudge each knob against its gradientw ← w − lr × ∂L/∂w = 1.00 − 0.02 × (-18.00) = 1.36b ← b − lr × ∂L/∂b = 0.50 − 0.02 × (-9.00) = 0.68The gradients are negative, so subtracting them raises w and b, which pushes the prediction up toward 7. Press Next to apply this and start round 2.",
+    "Round 2 · setupNew round, updated knobsUpdate applied, and both gradients were reset to zero (otherwise PyTorch would add the next round's gradients on top). Last round's loss was 20.25. The knobs are now w = 1.36, b = 0.68. Let's see whether the loss went down.",
+    "Round 12 · setupNew round, updated knobsSkipped ahead 10 rounds of forward, backward and update. Loss went from 12.96 to 0.23, and it keeps shrinking as the prediction closes in on 7. Last round's loss was 0.23. The knobs are now w = 2.65, b = 1.32. Let's see whether the loss went down."
+  ]
+}

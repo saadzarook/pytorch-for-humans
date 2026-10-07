@@ -47,6 +47,7 @@ scripts/
 .github/workflows/
   deploy-site.yml               build site → GitHub Pages
   notebooks.yml                 run snippets + execute every notebook
+  e2e.yml                       build site + Playwright browser tests
 ```
 
 ## Run the website locally
@@ -60,6 +61,10 @@ npm run build       # production build into site/dist/
 npm run preview     # serve the production build
 npm run check       # type-check
 npm test            # Vitest: sim maths vs PyTorch golden values, live sims vs facts
+npm run test:e2e    # Playwright (after `npm run build`): sim behaviour, narration snapshots,
+                    #   Pyodide cells, quiz, offline, 375px light/dark. First time:
+                    #   npx -w site playwright install chromium
+                    # Changing narration on purpose? UPDATE_NARRATION=1 npm run test:e2e -- narration
 ```
 
 The `.ipynb` download button appears once the notebooks are built into the site (see below, `--site`).

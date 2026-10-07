@@ -31,7 +31,7 @@ const rows = Math.min(Math.max(trimmed.split('\n').length, 4), 32);
 const uid = `py-${Math.random().toString(36).slice(2, 9)}`;
 ---
 
-<py-runner class="pfh-card py-runner" data-check={check} data-plot={plot}>
+<py-runner class="pfh-card py-runner" data-check={check} data-plot={plot} role="region" aria-label={`Python: ${title}`}>
   <div class="head">
     <span class="pfh-card-title">🐍 {title}</span>
     <span class="badge">Runs in your browser</span>

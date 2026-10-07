@@ -28,11 +28,12 @@ const { sim, title, options = {}, keys = { toggle: 'play / pause', next: 'step' 
   data-sim={sim}
   data-options={JSON.stringify(options)}
   tabindex="0"
+  role="region"
   aria-label={`${title}: interactive simulation`}
 >
   <div class="pfh-card-title">{title}</div>
   <slot name="intro" />
-  <div class="sim-narr" data-part="narrator" aria-live="polite">
+  <div class="sim-narr" data-part="narrator" role="status" aria-live="polite" aria-label="Narrator">
     <span class="ph">Loading</span>
     <b class="t">{title}</b>
     <p data-part="loading">Getting the simulation ready…</p>

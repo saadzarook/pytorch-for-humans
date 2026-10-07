@@ -1,0 +1,37 @@
+{
+  "start": [
+    "ReadyTwo knobs, one bowl, seen from aboveLeft: the data and the current line. Right: the loss for every (w, b): lighter means lower, and the × is the best line. The arrow on the dot points straight downhill. Pick a preset, then press Step."
+  ],
+  "🐢 Too slow": [
+    "ReadyTwo knobs, one bowl, seen from aboveLeft: the data and the current line. Right: the loss for every (w, b): lighter means lower, and the × is the best line. The arrow on the dot points straight downhill. 🐢 Too slow (learning rate 0.01). Press Step or Play.",
+    "Step 1 · falling inFalling into the valleyFar from the bottom the slope is steep, so the steps are big and the line on the left swings quickly towards the points.",
+    "Step 2 · falling inFalling into the valleyFar from the bottom the slope is steep, so the steps are big and the line on the left swings quickly towards the points.",
+    "Step 3 · falling inFalling into the valleyFar from the bottom the slope is steep, so the steps are big and the line on the left swings quickly towards the points.",
+    "Step 400 · out of time⏱️ Still getting thereA bigger learning rate would be faster. Push it up until it starts to zig-zag.",
+    "log: step 400⏱️ Stopped after 400 steps, still not there."
+  ],
+  "👌 Just right": [
+    "ReadyTwo knobs, one bowl, seen from aboveLeft: the data and the current line. Right: the loss for every (w, b): lighter means lower, and the × is the best line. The arrow on the dot points straight downhill. 👌 Just right (learning rate 0.1). Press Step or Play.",
+    "Step 1 · falling inFalling into the valleyFar from the bottom the slope is steep, so the steps are big and the line on the left swings quickly towards the points.",
+    "Step 2 · falling inFalling into the valleyFar from the bottom the slope is steep, so the steps are big and the line on the left swings quickly towards the points.",
+    "Step 3 · zig-zagBouncing between the valley wallsThis valley is long and narrow: steep across, gentle along. A step that suits the gentle direction overshoots the steep one, so the dot bounces from wall to wall while creeping along.",
+    "Step 230 · converged🎯 Converged after 230 stepsThe dot reached the ×, so the line on the left is the best line through the data. Every step from here would be tiny.",
+    "log: step 230🎯 Converged: w ≈ 4.84, b ≈ 8.33.step 4Zig-zagging across the valley: the walls are steep, so each step overshoots sideways."
+  ],
+  "〰️ Zig-zag": [
+    "ReadyTwo knobs, one bowl, seen from aboveLeft: the data and the current line. Right: the loss for every (w, b): lighter means lower, and the × is the best line. The arrow on the dot points straight downhill. 〰️ Zig-zag (learning rate 0.16). Press Step or Play.",
+    "Step 1 · falling inFalling into the valleyFar from the bottom the slope is steep, so the steps are big and the line on the left swings quickly towards the points.",
+    "Step 2 · falling inFalling into the valleyFar from the bottom the slope is steep, so the steps are big and the line on the left swings quickly towards the points.",
+    "Step 3 · zig-zagBouncing between the valley wallsThis valley is long and narrow: steep across, gentle along. A step that suits the gentle direction overshoots the steep one, so the dot bounces from wall to wall while creeping along.",
+    "Step 151 · converged🎯 Converged after 151 stepsThe dot reached the ×, so the line on the left is the best line through the data. Every step from here would be tiny.",
+    "log: step 151🎯 Converged: w ≈ 4.84, b ≈ 8.33.step 4Zig-zagging across the valley: the walls are steep, so each step overshoots sideways."
+  ],
+  "🔥 Chaos mode": [
+    "ReadyTwo knobs, one bowl, seen from aboveLeft: the data and the current line. Right: the loss for every (w, b): lighter means lower, and the × is the best line. The arrow on the dot points straight downhill. 🔥 Chaos mode (learning rate 0.18). Press Step or Play.",
+    "Step 1 · falling inFalling into the valleyFar from the bottom the slope is steep, so the steps are big and the line on the left swings quickly towards the points.",
+    "Step 2 · falling inFalling into the valleyFar from the bottom the slope is steep, so the steps are big and the line on the left swings quickly towards the points.",
+    "Step 3 · zig-zagBouncing between the valley wallsThis valley is long and narrow: steep across, gentle along. A step that suits the gentle direction overshoots the steep one, so the dot bounces from wall to wall while creeping along.",
+    "Step 49 · exploded💥 Loss exploded. 🐶☕🔥 \"This is fine.\"Each step overshoots the valley a bit more than the last, along the steep direction of the bowl. Lower the learning rate.",
+    "log: step 49💥 Exploded. Each step overshoots the valley by more than the last.step 4Zig-zagging across the valley: the walls are steep, so each step overshoots sideways.step 1Loss went up (353.56 → 455.29): learning rate too big, you overshot across the valley."
+  ]
+}

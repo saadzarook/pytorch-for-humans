@@ -38,7 +38,7 @@ const md = (s: string) =>
     .replace(/\*([^*]+)\*/g, '<em>$1</em>');
 ---
 
-<pfh-quiz class="pfh-card quiz" data-total={questions.length}>
+<pfh-quiz class="pfh-card quiz" data-total={questions.length} role="region" aria-label={title}>
   <div class="pfh-card-title">🧠 {title}</div>
   <p class="score" role="status" aria-live="polite">
     Answer each question. You can retry; the explanation appears for whatever you pick.

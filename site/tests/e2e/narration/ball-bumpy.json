@@ -1,0 +1,29 @@
+{
+  "start": [
+    "ReadyThe ball is your current guessThe curve is the loss for every value of w. The dashed line is the slope your feet feel, and the arrow shows where the next hop lands: w − lr × slope. Pick a preset, then press Step."
+  ],
+  "🕳️ Stuck in a dip": [
+    "ReadyThe ball is your current guessThe curve is the loss for every value of w. The dashed line is the slope your feet feel, and the arrow shows where the next hop lands: w − lr × slope. 🕳️ Stuck in a dip: It settles happily in the nearest valley… which is not the deepest one. Press Step or Play.",
+    "Step 1 · rolling downhillFeeling the slope, stepping downhillEvery step is learning rate × slope. The learning rate never changes, but near the bottom the slope gets flatter, so the steps get smaller on their own.",
+    "Step 2 · rolling downhillSteps shrink as the slope flattensEvery step is learning rate × slope. The learning rate never changes, but near the bottom the slope gets flatter, so the steps get smaller on their own.",
+    "Step 3 · rolling downhillSteps shrink as the slope flattensEvery step is learning rate × slope. The learning rate never changes, but near the bottom the slope gets flatter, so the steps get smaller on their own.",
+    "Step 44 · stuck🦋 \"Is this the global minimum?\" Nope.It settled at w = 2.34, a local minimum: the slope is flat here too, so it can't tell. There's a deeper valley at w ≈ −2.64. Try another start, or a bigger step.",
+    "log: step 44🦋 Settled in a local minimum at w = 2.34, not the deepest valley."
+  ],
+  "🦘 Lucky leap": [
+    "ReadyThe ball is your current guessThe curve is the loss for every value of w. The dashed line is the slope your feet feel, and the arrow shows where the next hop lands: w − lr × slope. 🦘 Lucky leap: A steep start plus a big step hops right over the hill. Press Step or Play.",
+    "Step 1 · rolling downhillFeeling the slope, stepping downhillEvery step is learning rate × slope. The learning rate never changes, but near the bottom the slope gets flatter, so the steps get smaller on their own.",
+    "Step 2 · rolling downhillSteps shrink as the slope flattensEvery step is learning rate × slope. The learning rate never changes, but near the bottom the slope gets flatter, so the steps get smaller on their own.",
+    "Step 3 · rolling downhillFeeling the slope, stepping downhillEvery step is learning rate × slope. The learning rate never changes, but near the bottom the slope gets flatter, so the steps get smaller on their own.",
+    "Step 15 · settled🎯 Settled at the bottom after 15 stepsThe slope here is flat, so the step (learning rate × slope) is about zero: gradient descent stops by itself.",
+    "log: step 15🎯 Settled at the bottom (w = −2.64).step 8Hopped past the bottom to the other side: the step (0.13) was bigger than the distance to the low point."
+  ],
+  "🎯 Good start": [
+    "ReadyThe ball is your current guessThe curve is the loss for every value of w. The dashed line is the slope your feet feel, and the arrow shows where the next hop lands: w − lr × slope. 🎯 Good start: Same small steps, different starting point: now it finds the deep valley. Press Step or Play.",
+    "Step 1 · rolling downhillFeeling the slope, stepping downhillEvery step is learning rate × slope. The learning rate never changes, but near the bottom the slope gets flatter, so the steps get smaller on their own.",
+    "Step 2 · rolling downhillFeeling the slope, stepping downhillEvery step is learning rate × slope. The learning rate never changes, but near the bottom the slope gets flatter, so the steps get smaller on their own.",
+    "Step 3 · rolling downhillFeeling the slope, stepping downhillEvery step is learning rate × slope. The learning rate never changes, but near the bottom the slope gets flatter, so the steps get smaller on their own.",
+    "Step 53 · settled🎯 Settled at the bottom after 53 stepsThe slope here is flat, so the step (learning rate × slope) is about zero: gradient descent stops by itself.",
+    "log: step 53🎯 Settled at the bottom (w = −2.64)."
+  ]
+}

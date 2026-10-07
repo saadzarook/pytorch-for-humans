@@ -1,0 +1,37 @@
+{
+  "start": [
+    "ReadyThe ball is your current guessThe curve is the loss for every value of w. The dashed line is the slope your feet feel, and the arrow shows where the next hop lands: w − lr × slope. Pick a preset, then press Step."
+  ],
+  "🐢 Too slow": [
+    "ReadyThe ball is your current guessThe curve is the loss for every value of w. The dashed line is the slope your feet feel, and the arrow shows where the next hop lands: w − lr × slope. 🐢 Too slow: Baby steps. It will get there… eventually. Maybe go make chai. Press Step or Play.",
+    "Step 1 · rolling downhillFeeling the slope, stepping downhillEvery step is learning rate × slope. The learning rate never changes, but near the bottom the slope gets flatter, so the steps get smaller on their own.",
+    "Step 2 · rolling downhillSteps shrink as the slope flattensEvery step is learning rate × slope. The learning rate never changes, but near the bottom the slope gets flatter, so the steps get smaller on their own.",
+    "Step 3 · rolling downhillSteps shrink as the slope flattensEvery step is learning rate × slope. The learning rate never changes, but near the bottom the slope gets flatter, so the steps get smaller on their own.",
+    "Step 181 · settled🎯 Settled at the bottom after 181 stepsThe slope here is flat, so the step (learning rate × slope) is about zero: gradient descent stops by itself.",
+    "log: step 181🎯 Settled at the bottom (w = 2.00)."
+  ],
+  "👌 Just right": [
+    "ReadyThe ball is your current guessThe curve is the loss for every value of w. The dashed line is the slope your feet feel, and the arrow shows where the next hop lands: w − lr × slope. 👌 Just right: Big steps while the slope is steep, smaller ones as it flattens out. Press Step or Play.",
+    "Step 1 · rolling downhillFeeling the slope, stepping downhillEvery step is learning rate × slope. The learning rate never changes, but near the bottom the slope gets flatter, so the steps get smaller on their own.",
+    "Step 2 · rolling downhillSteps shrink as the slope flattensEvery step is learning rate × slope. The learning rate never changes, but near the bottom the slope gets flatter, so the steps get smaller on their own.",
+    "Step 3 · rolling downhillSteps shrink as the slope flattensEvery step is learning rate × slope. The learning rate never changes, but near the bottom the slope gets flatter, so the steps get smaller on their own.",
+    "Step 11 · settled🎯 Settled at the bottom after 11 stepsThe slope here is flat, so the step (learning rate × slope) is about zero: gradient descent stops by itself.",
+    "log: step 11🎯 Settled at the bottom (w = 2.00)."
+  ],
+  "🏓 Bouncy": [
+    "ReadyThe ball is your current guessThe curve is the loss for every value of w. The dashed line is the slope your feet feel, and the arrow shows where the next hop lands: w − lr × slope. 🏓 Bouncy: Overshoots the bottom every time, bouncing side to side, but the bounces shrink. Press Step or Play.",
+    "Step 1 · bouncingOvershooting, but shrinkingIt jumps past the bottom each time, yet every bounce is smaller than the last, so it still settles. Watch the loss chart zig-zag down.",
+    "Step 2 · bouncingOvershooting, but shrinkingIt jumps past the bottom each time, yet every bounce is smaller than the last, so it still settles. Watch the loss chart zig-zag down.",
+    "Step 3 · bouncingOvershooting, but shrinkingIt jumps past the bottom each time, yet every bounce is smaller than the last, so it still settles. Watch the loss chart zig-zag down.",
+    "Step 44 · settled🎯 Settled at the bottom after 44 stepsThe slope here is flat, so the step (learning rate × slope) is about zero: gradient descent stops by itself.",
+    "log: step 44🎯 Settled at the bottom (w = 2.00).step 1Hopped past the bottom to the other side: the step (−7.20) was bigger than the distance to the low point."
+  ],
+  "🔥 Chaos mode": [
+    "ReadyThe ball is your current guessThe curve is the loss for every value of w. The dashed line is the slope your feet feel, and the arrow shows where the next hop lands: w − lr × slope. 🔥 Chaos mode: Every hop overshoots by more than the last. Watch the loss chart. Press Step or Play.",
+    "Step 1 · overshootingThe loss went UPEach hop jumps past the bottom and lands higher than before. The learning rate is too big for this slope.",
+    "Step 2 · overshootingThe loss went UPEach hop jumps past the bottom and lands higher than before. The learning rate is too big for this slope.",
+    "Step 3 · overshootingThe loss went UPEach hop jumps past the bottom and lands higher than before. The learning rate is too big for this slope.",
+    "Step 131 · exploded💥 Loss exploded. 🐶☕🔥 \"This is fine.\" (It is not fine.)Every hop overshoots the valley by more than the last, so the ball flies off. For this bowl that happens above lr = 1. Try a smaller learning rate.",
+    "log: step 131💥 Exploded. Every hop overshoots by more than the last.step 1Loss went up (16.00 → 19.36): learning rate too big, you overshot.step 1Hopped past the bottom to the other side: the step (−8.40) was bigger than the distance to the low point."
+  ]
+}

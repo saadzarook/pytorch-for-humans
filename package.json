@@ -13,6 +13,7 @@
     "build": "npm run build -w site",
     "preview": "npm run preview -w site",
     "check": "npm run check -w site",
-    "test": "npm run test -w site"
+    "test": "npm run test -w site",
+    "test:e2e": "npm run test:e2e -w site"
   }
 }
